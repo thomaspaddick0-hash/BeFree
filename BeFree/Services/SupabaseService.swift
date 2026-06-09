@@ -7,9 +7,8 @@ import CryptoKit
 final class SupabaseService {
     static let shared = SupabaseService()
 
-    // TODO: Replace with your Supabase project URL and anon key
-    private let url = URL(string: "https://YOUR_PROJECT.supabase.co")!
-    private let anonKey = "YOUR_SUPABASE_ANON_KEY"
+    private let url = URL(string: Secrets.supabaseURL)!
+    private let anonKey = Secrets.supabaseAnonKey
 
     private var headers: [String: String] {
         ["apikey": anonKey, "Authorization": "Bearer \(anonKey)", "Content-Type": "application/json"]

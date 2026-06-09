@@ -18,5 +18,5 @@ Pods/
 .DS_Store
 
 # Secrets (never commit real keys)
-Secrets.swift
+BeFree/Secrets.swift
 *.env

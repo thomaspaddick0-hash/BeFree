@@ -3,9 +3,8 @@ import Foundation
 final class ResendService {
     static let shared = ResendService()
 
-    // TODO: Replace with your Resend API key and verified sending domain
-    private let apiKey = "YOUR_RESEND_API_KEY"
-    private let fromAddress = "BeFree <noreply@yourdomain.com>"
+    private let apiKey = Secrets.resendAPIKey
+    private let fromAddress = "BeFree <onboarding@resend.dev>"
 
     func sendCode(_ code: String, appName: String, userName: String, toEmail: String) async throws {
         var req = URLRequest(url: URL(string: "https://api.resend.com/emails")!)
