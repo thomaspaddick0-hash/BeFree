@@ -5,7 +5,7 @@ import Foundation
 // Handles taps on the shield buttons.
 // The primary button ("Enter unlock code") opens the main BeFree app
 // via a deep link so the user can enter their code.
-class ShieldActionExtension: ShieldActionDataSource {
+class ShieldActionExtension: ShieldActionDelegate {
 
     override func handle(
         action: ShieldAction,
