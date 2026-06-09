@@ -63,6 +63,8 @@ final class BlockManager: ObservableObject {
         )
 
         activeBlocks.append(block)
+        saveStoredSelections()
+        startMonitoringIfNeeded()
     }
 
     func unlock(block: Block, code: String) async throws {
@@ -81,9 +83,35 @@ final class BlockManager: ObservableObject {
         sharedDefaults.set(try? JSONEncoder().encode(stored), forKey: "blockedAt")
 
         activeBlocks.removeAll { $0.id == block.id }
+        saveStoredSelections()
+        if activeBlocks.isEmpty {
+            activityCenter.stopMonitoring([activityName])
+        }
     }
 
     // MARK: - Private
+
+    private let activityName = DeviceActivityName("befreeRestrictions")
+
+    private func saveStoredSelections() {
+        let selections = activeBlocks.map { block in
+            StoredSelection(
+                blockId: block.id.uuidString,
+                selectionData: block.activitySelectionData,
+                domains: block.blockedDomains
+            )
+        }
+        sharedDefaults.set(try? JSONEncoder().encode(selections), forKey: "storedSelections")
+    }
+
+    private func startMonitoringIfNeeded() {
+        let schedule = DeviceActivitySchedule(
+            intervalStart: DateComponents(hour: 0, minute: 0),
+            intervalEnd: DateComponents(hour: 23, minute: 59),
+            repeats: true
+        )
+        try? activityCenter.startMonitoring(activityName, during: schedule)
+    }
 
     private func applyRestrictions(selection: FamilyActivitySelection, domains: [String]) {
         var blocked = store.application.blockedApplications ?? []
@@ -106,4 +134,11 @@ final class BlockManager: ObservableObject {
         else { return [:] }
         return decoded
     }
+}
+
+// Shared structure — must match the definition in DeviceActivityMonitorExtension.swift
+private struct StoredSelection: Codable {
+    let blockId: String
+    let selectionData: Data?
+    let domains: [String]
 }
