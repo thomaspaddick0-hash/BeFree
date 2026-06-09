@@ -1,55 +1,60 @@
 import Foundation
 import CryptoKit
-
-// Requires: supabase-swift package
-// https://github.com/supabase/supabase-swift
+import Supabase
 
 final class SupabaseService {
     static let shared = SupabaseService()
 
-    private let url = URL(string: Secrets.supabaseURL)!
-    private let anonKey = Secrets.supabaseAnonKey
+    let client = SupabaseClient(
+        supabaseURL: URL(string: Secrets.supabaseURL)!,
+        supabaseKey: Secrets.supabaseAnonKey
+    )
 
-    private var headers: [String: String] {
-        ["apikey": anonKey, "Authorization": "Bearer \(anonKey)", "Content-Type": "application/json"]
+    var currentUserID: UUID? {
+        client.auth.currentUser?.id
+    }
+
+    func signInIfNeeded() async throws {
+        do {
+            _ = try await client.auth.session
+        } catch {
+            try await client.auth.signInAnonymously()
+        }
     }
 
     func fetchActiveBlocks() async throws -> [Block] {
-        var req = URLRequest(url: url.appendingPathComponent("rest/v1/blocks"))
-        req.allHTTPHeaderFields = headers
-        req.url?.append(queryItems: [URLQueryItem(name: "unlocked_at", value: "is.null")])
-        let (data, _) = try await URLSession.shared.data(for: req)
-        return try JSONDecoder().decode([SupabaseBlock].self, from: data).map(\.block)
+        let rows: [SupabaseBlock] = try await client
+            .from("blocks")
+            .select()
+            .filter("unlocked_at", operator: "is", value: "null")
+            .execute()
+            .value
+        return rows.map(\.block)
     }
 
-    func insertBlock(_ block: Block, code: String) async throws {
-        var req = URLRequest(url: url.appendingPathComponent("rest/v1/blocks"))
-        req.httpMethod = "POST"
-        req.allHTTPHeaderFields = headers
-        let payload = SupabaseBlock(from: block, codeHash: sha256(code))
-        req.httpBody = try JSONEncoder().encode(payload)
-        let (_, response) = try await URLSession.shared.data(for: req)
-        guard (response as? HTTPURLResponse)?.statusCode == 201 else { throw BeFreeError.serverError }
+    func insertBlock(_ block: Block, code: String, userID: UUID) async throws {
+        let payload = SupabaseBlock(from: block, codeHash: sha256(code), userID: userID)
+        try await client.from("blocks").insert(payload).execute()
     }
 
     func verifyAndUnlock(blockId: UUID, code: String) async throws {
-        // Fetch the block to check the hash
-        var req = URLRequest(url: url.appendingPathComponent("rest/v1/blocks"))
-        req.allHTTPHeaderFields = headers
-        req.url?.append(queryItems: [URLQueryItem(name: "id", value: "eq.\(blockId.uuidString)")])
-        let (data, _) = try await URLSession.shared.data(for: req)
-        let blocks = try JSONDecoder().decode([SupabaseBlock].self, from: data)
-        guard let stored = blocks.first else { throw BeFreeError.blockNotFound }
+        let rows: [SupabaseBlock] = try await client
+            .from("blocks")
+            .select()
+            .eq("id", value: blockId.uuidString)
+            .execute()
+            .value
+        guard let stored = rows.first else { throw BeFreeError.blockNotFound }
         guard stored.codeHash == sha256(code) else { throw BeFreeError.wrongCode }
 
-        // Mark unlocked
-        var patchReq = URLRequest(url: url.appendingPathComponent("rest/v1/blocks"))
-        patchReq.httpMethod = "PATCH"
-        patchReq.allHTTPHeaderFields = headers
-        patchReq.url?.append(queryItems: [URLQueryItem(name: "id", value: "eq.\(blockId.uuidString)")])
-        patchReq.httpBody = try JSONEncoder().encode(["unlocked_at": ISO8601DateFormatter().string(from: Date())])
-        let (_, patchResponse) = try await URLSession.shared.data(for: patchReq)
-        guard (patchResponse as? HTTPURLResponse)?.statusCode == 204 else { throw BeFreeError.serverError }
+        struct UnlockPayload: Encodable {
+            let unlocked_at: String
+        }
+        try await client
+            .from("blocks")
+            .update(UnlockPayload(unlocked_at: ISO8601DateFormatter().string(from: Date())))
+            .eq("id", value: blockId.uuidString)
+            .execute()
     }
 
     private func sha256(_ input: String) -> String {
@@ -62,6 +67,7 @@ final class SupabaseService {
 
 private struct SupabaseBlock: Codable {
     var id: String
+    var userId: String
     var appName: String
     var blockedDomains: [String]
     var friendEmail: String
@@ -70,13 +76,14 @@ private struct SupabaseBlock: Codable {
     var unlockedAt: String?
 
     enum CodingKeys: String, CodingKey {
-        case id, friendEmail = "friend_email", appName = "app_name"
-        case blockedDomains = "blocked_domains", codeHash = "code_hash"
-        case blockedAt = "blocked_at", unlockedAt = "unlocked_at"
+        case id, userId = "user_id", appName = "app_name"
+        case friendEmail = "friend_email", blockedDomains = "blocked_domains"
+        case codeHash = "code_hash", blockedAt = "blocked_at", unlockedAt = "unlocked_at"
     }
 
-    init(from block: Block, codeHash: String) {
+    init(from block: Block, codeHash: String, userID: UUID) {
         self.id = block.id.uuidString
+        self.userId = userID.uuidString
         self.appName = block.appName
         self.blockedDomains = block.blockedDomains
         self.friendEmail = block.friendEmail
@@ -98,13 +105,14 @@ private struct SupabaseBlock: Codable {
 }
 
 enum BeFreeError: LocalizedError {
-    case serverError, blockNotFound, wrongCode
+    case serverError, blockNotFound, wrongCode, notSignedIn
 
     var errorDescription: String? {
         switch self {
         case .serverError: return "Something went wrong. Please try again."
         case .blockNotFound: return "Block not found."
         case .wrongCode: return "That code is incorrect. Ask your friend again."
+        case .notSignedIn: return "Not signed in. Please restart the app."
         }
     }
 }

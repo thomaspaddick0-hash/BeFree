@@ -16,6 +16,7 @@ final class BlockManager: ObservableObject {
     private let sharedDefaults = UserDefaults(suiteName: "group.com.befree.app")!
 
     func loadBlocks() async {
+        do { try await supabase.signInIfNeeded() } catch { return }
         guard let blocks = try? await supabase.fetchActiveBlocks() else { return }
         activeBlocks = blocks
     }
@@ -43,7 +44,8 @@ final class BlockManager: ObservableObject {
         )
 
         // Save to Supabase (stores hashed code)
-        try await supabase.insertBlock(block, code: code)
+        guard let userID = supabase.currentUserID else { throw BeFreeError.notSignedIn }
+        try await supabase.insertBlock(block, code: code, userID: userID)
 
         // Email the code to the friend
         try await resend.sendCode(code, appName: appName, userName: userName, toEmail: friendEmail)
