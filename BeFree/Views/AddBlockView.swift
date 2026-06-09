@@ -126,3 +126,8 @@ struct AddBlockView: View {
         isSubmitting = false
     }
 }
+
+#Preview {
+    AddBlockView()
+        .environmentObject(BlockManager())
+}

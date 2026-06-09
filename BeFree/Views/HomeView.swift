@@ -67,3 +67,24 @@ struct HomeView: View {
         .listStyle(.insetGrouped)
     }
 }
+
+private extension BlockManager {
+    static var withBlocks: BlockManager {
+        let m = BlockManager()
+        m.activeBlocks = [
+            Block(id: UUID(), appName: "Instagram", blockedDomains: ["instagram.com"], friendEmail: "friend@example.com", blockedAt: Date().addingTimeInterval(-5025)),
+            Block(id: UUID(), appName: "TikTok", blockedDomains: ["tiktok.com"], friendEmail: "friend@example.com", blockedAt: Date().addingTimeInterval(-900))
+        ]
+        return m
+    }
+}
+
+#Preview("With blocks") {
+    NavigationStack { HomeView() }
+        .environmentObject(BlockManager.withBlocks)
+}
+
+#Preview("Empty") {
+    NavigationStack { HomeView() }
+        .environmentObject(BlockManager())
+}

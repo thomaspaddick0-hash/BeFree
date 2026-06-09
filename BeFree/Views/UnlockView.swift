@@ -91,3 +91,14 @@ struct UnlockView: View {
         isSubmitting = false
     }
 }
+
+#Preview {
+    UnlockView(block: Block(
+        id: UUID(),
+        appName: "Instagram",
+        blockedDomains: ["instagram.com"],
+        friendEmail: "friend@example.com",
+        blockedAt: Date().addingTimeInterval(-5025)
+    ))
+    .environmentObject(BlockManager())
+}

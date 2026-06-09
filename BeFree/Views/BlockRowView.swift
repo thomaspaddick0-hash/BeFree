@@ -28,3 +28,23 @@ struct BlockRowView: View {
         }
     }
 }
+
+#Preview {
+    List {
+        BlockRowView(block: Block(
+            id: UUID(),
+            appName: "Instagram",
+            blockedDomains: ["instagram.com"],
+            friendEmail: "friend@example.com",
+            blockedAt: Date().addingTimeInterval(-5025)
+        ))
+        BlockRowView(block: Block(
+            id: UUID(),
+            appName: "TikTok",
+            blockedDomains: ["tiktok.com"],
+            friendEmail: "friend@example.com",
+            blockedAt: Date().addingTimeInterval(-900)
+        ))
+    }
+    .environmentObject(BlockManager())
+}
