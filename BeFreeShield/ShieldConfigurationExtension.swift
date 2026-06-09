@@ -14,7 +14,6 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         return ShieldConfiguration(
             backgroundBlurStyle: .systemUltraThinMaterialDark,
             backgroundColor: UIColor.systemBackground,
-            icon: application.icon,
             title: ShieldConfiguration.Label(
                 text: "You're blocked from \(appName)",
                 color: .label

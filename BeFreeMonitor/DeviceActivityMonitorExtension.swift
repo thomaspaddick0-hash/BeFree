@@ -1,4 +1,5 @@
 import DeviceActivity
+import FamilyControls
 import ManagedSettings
 import Foundation
 
@@ -36,16 +37,16 @@ class DeviceActivityMonitorExtension: DeviceActivityMonitor {
         for item in selections {
             if let selectionData = item.selectionData,
                let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: selectionData) {
-                var blocked = store.application.blockedApplications ?? []
+                var blocked = store.shield.applications ?? []
                 blocked.formUnion(selection.applicationTokens)
-                store.application.blockedApplications = blocked
+                store.shield.applications = blocked
             }
             item.domains.forEach { allDomains.insert($0) }
         }
 
         if !allDomains.isEmpty {
             store.webContent.blockedByFilter = .specific(
-                WebContentFilter(blockedDomains: allDomains)
+                Set(allDomains.map { WebDomain(domain: $0) })
             )
         }
     }

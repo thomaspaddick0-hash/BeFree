@@ -37,7 +37,7 @@ struct UnlockView: View {
                         .keyboardType(.numberPad)
                         .textFieldStyle(.roundedBorder)
                         .frame(width: 180)
-                        .onChange(of: code) { _, new in
+                        .onChange(of: code) { new in
                             code = String(new.prefix(4).filter(\.isNumber))
                         }
 

@@ -30,7 +30,7 @@ struct HomeView: View {
         .sheet(item: $deepLinkUnlockBlock) { block in
             UnlockView(block: block)
         }
-        .onChange(of: blockManager.pendingUnlockDeepLink) { _, triggered in
+        .onChange(of: blockManager.pendingUnlockDeepLink) { triggered in
             guard triggered, let block = blockManager.activeBlocks.first else { return }
             deepLinkUnlockBlock = block
             blockManager.pendingUnlockDeepLink = false

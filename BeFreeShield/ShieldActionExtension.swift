@@ -18,7 +18,10 @@ class ShieldActionExtension: ShieldActionDelegate {
             // The main app registers the befree:// URL scheme
             openBeFreeApp()
             completionHandler(.defer)
-        case .secondaryButtonPressed:
+        case .secondaryButtonPressed,
+             .firstSecondarySubmenuItemPressed,
+             .secondSecondarySubmenuItemPressed,
+             .thirdSecondarySubmenuItemPressed:
             completionHandler(.close)
         @unknown default:
             completionHandler(.close)

@@ -1,0 +1,124 @@
+name: BeFree
+options:
+  bundleIdPrefix: com.befree
+  deploymentTarget:
+    iOS: "16.0"
+  createIntermediateGroups: true
+  generateEmptyDirectories: true
+
+settings:
+  base:
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    DEVELOPMENT_TEAM: HYKMNRWXBK
+    MARKETING_VERSION: "1.0"
+    CURRENT_PROJECT_VERSION: "1"
+
+packages:
+  Supabase:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.0.0"
+
+targets:
+  BeFree:
+    type: application
+    platform: iOS
+    sources:
+      - path: BeFree
+        excludes:
+          - "Info.plist"
+          - "BeFree.entitlements"
+          - "Secrets.example.swift"
+    info:
+      path: BeFree/Info.plist
+      properties:
+        CFBundleDisplayName: BeFree
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        LSRequiresIPhoneOS: true
+        UILaunchScreen:
+          UIColorName: ""
+        UIRequiredDeviceCapabilities:
+          - armv7
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        CFBundleURLTypes:
+          - CFBundleURLName: com.befree.app
+            CFBundleURLSchemes:
+              - befree
+    entitlements:
+      path: BeFree/BeFree.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.befree.app
+        com.apple.developer.family-controls: true
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.befree.app
+        INFOPLIST_KEY_UIApplicationSceneManifest_Generation: YES
+        INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents: YES
+        ENABLE_PREVIEWS: YES
+    dependencies:
+      - package: Supabase
+        product: Supabase
+      - target: BeFreeShield
+      - target: BeFreeMonitor
+
+  BeFreeShield:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BeFreeShield
+        excludes:
+          - "Info.plist"
+          - "BeFreeShield.entitlements"
+    info:
+      path: BeFreeShield/Info.plist
+      properties:
+        CFBundleDisplayName: BeFreeShield
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettingsUI.shield-configuration-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShieldConfigurationExtension
+    entitlements:
+      path: BeFreeShield/BeFreeShield.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.befree.app
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.befree.app.shield
+
+  BeFreeMonitor:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BeFreeMonitor
+        excludes:
+          - "Info.plist"
+          - "BeFreeMonitor.entitlements"
+    info:
+      path: BeFreeMonitor/Info.plist
+      properties:
+        CFBundleDisplayName: BeFreeMonitor
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.deviceactivity.monitor-extension
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).DeviceActivityMonitorExtension
+    entitlements:
+      path: BeFreeMonitor/BeFreeMonitor.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.befree.app
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.befree.app.monitor

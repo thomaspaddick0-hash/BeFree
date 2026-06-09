@@ -73,7 +73,7 @@ final class BlockManager: ObservableObject {
         // Only remove restrictions for this specific block's apps
         if let data = block.activitySelectionData,
            let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) {
-            store.application.blockedApplications?.subtract(selection.applicationTokens)
+            store.shield.applications?.subtract(selection.applicationTokens)
         }
         // Rebuild web filter from remaining active blocks
         rebuildWebFilter()
@@ -114,9 +114,9 @@ final class BlockManager: ObservableObject {
     }
 
     private func applyRestrictions(selection: FamilyActivitySelection, domains: [String]) {
-        var blocked = store.application.blockedApplications ?? []
+        var blocked = store.shield.applications ?? []
         blocked.formUnion(selection.applicationTokens)
-        store.application.blockedApplications = blocked
+        store.shield.applications = blocked
 
         rebuildWebFilter()
     }
@@ -125,7 +125,7 @@ final class BlockManager: ObservableObject {
         let allDomains = activeBlocks.filter(\.isActive).flatMap(\.blockedDomains)
         store.webContent.blockedByFilter = allDomains.isEmpty
             ? nil
-            : .specific(WebContentFilter(blockedDomains: Set(allDomains)))
+            : .specific(Set(allDomains.map { WebDomain(domain: $0) }))
     }
 
     private func storedBlocks() -> [String: Date] {
