@@ -6,6 +6,7 @@ import DeviceActivity
 @MainActor
 final class BlockManager: ObservableObject {
     @Published var activeBlocks: [Block] = []
+    @Published var pendingUnlockDeepLink = false
 
     private let store = ManagedSettingsStore()
     private let activityCenter = DeviceActivityCenter()

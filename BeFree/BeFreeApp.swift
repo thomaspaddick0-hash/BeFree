@@ -8,6 +8,10 @@ struct BeFreeApp: App {
         WindowGroup {
             ContentView()
                 .environmentObject(blockManager)
+                .onOpenURL { url in
+                    guard url.scheme == "befree", url.host == "unlock" else { return }
+                    blockManager.pendingUnlockDeepLink = true
+                }
         }
     }
 }

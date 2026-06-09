@@ -3,6 +3,7 @@ import SwiftUI
 struct HomeView: View {
     @EnvironmentObject var blockManager: BlockManager
     @State private var showingAddBlock = false
+    @State private var deepLinkUnlockBlock: Block?
 
     var body: some View {
         Group {
@@ -25,6 +26,14 @@ struct HomeView: View {
         }
         .sheet(isPresented: $showingAddBlock) {
             AddBlockView()
+        }
+        .sheet(item: $deepLinkUnlockBlock) { block in
+            UnlockView(block: block)
+        }
+        .onChange(of: blockManager.pendingUnlockDeepLink) { _, triggered in
+            guard triggered, let block = blockManager.activeBlocks.first else { return }
+            deepLinkUnlockBlock = block
+            blockManager.pendingUnlockDeepLink = false
         }
     }
 
