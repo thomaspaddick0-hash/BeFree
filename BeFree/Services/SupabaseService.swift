@@ -119,3 +119,11 @@ enum BeFreeError: LocalizedError {
         }
     }
 }
+
+enum ResendError: LocalizedError {
+    case failed(String)
+    var errorDescription: String? {
+        if case .failed(let body) = self { return "Email failed: \(body)" }
+        return nil
+    }
+}
