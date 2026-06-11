@@ -5,6 +5,19 @@ struct AppEntry: Identifiable {
     let name: String
     let domains: [String]
     let category: String
+
+    var iosCategory: String {
+        switch category {
+        case "Social":   return "Social Networking"
+        case "Video":    return "Entertainment"
+        case "Music":    return "Music"
+        case "Shopping": return "Shopping"
+        case "Gaming":   return "Games"
+        case "News":     return "News"
+        case "Dating":   return "Social Networking"
+        default:         return category
+        }
+    }
 }
 
 struct AppDomainMap {
