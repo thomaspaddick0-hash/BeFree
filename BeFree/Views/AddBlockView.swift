@@ -13,6 +13,7 @@ struct AddBlockView: View {
     @State private var userName = ""
     @State private var isSubmitting = false
     @State private var errorMessage: String?
+    @State private var isRequestingAuth = false
 
     private var suggestedDomains: [String] {
         AppDomainMap.domains(for: appName)
@@ -36,7 +37,7 @@ struct AddBlockView: View {
 
                 Section {
                     Button {
-                        showingPicker = true
+                        Task { await requestAuthAndShowPicker() }
                     } label: {
                         Label(
                             activitySelection.applicationTokens.isEmpty ? "Choose App" : "App selected ✓",
@@ -106,6 +107,18 @@ struct AddBlockView: View {
         && !friendEmail.trimmingCharacters(in: .whitespaces).isEmpty
         && !userName.trimmingCharacters(in: .whitespaces).isEmpty
         && !domainsToBlock.isEmpty
+    }
+
+    private func requestAuthAndShowPicker() async {
+        #if !targetEnvironment(simulator)
+        do {
+            try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
+        } catch {
+            errorMessage = "Screen Time permission is required to block apps."
+            return
+        }
+        #endif
+        showingPicker = true
     }
 
     private func submit() async {

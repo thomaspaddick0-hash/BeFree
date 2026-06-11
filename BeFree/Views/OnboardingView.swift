@@ -1,11 +1,7 @@
 import SwiftUI
-import FamilyControls
 
 struct OnboardingView: View {
     var onComplete: () -> Void
-
-    @State private var isRequesting = false
-    @State private var authError: String?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -44,33 +40,17 @@ struct OnboardingView: View {
             Spacer()
 
             VStack(spacing: 12) {
-                if let error = authError {
-                    Text(error)
-                        .font(.footnote)
-                        .foregroundStyle(.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-
-                Button(action: requestAuthorization) {
-                    Group {
-                        if isRequesting {
-                            ProgressView()
-                                .tint(.white)
-                        } else {
-                            Text("Get Started")
-                                .font(.headline)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 54)
+                Button(action: onComplete) {
+                    Text("Get Started")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.large)
-                .disabled(isRequesting)
                 .padding(.horizontal)
 
-                Text("BeFree needs Screen Time permission to block apps.")
+                Text("Screen Time permission will be requested when you block your first app.")
                     .font(.caption)
                     .foregroundStyle(.tertiary)
                     .multilineTextAlignment(.center)
@@ -94,23 +74,6 @@ struct OnboardingView: View {
         }
     }
 
-    private func requestAuthorization() {
-        #if targetEnvironment(simulator)
-        onComplete()
-        #else
-        isRequesting = true
-        authError = nil
-        Task {
-            do {
-                try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
-                onComplete()
-            } catch {
-                authError = "Permission is required to block apps. Please allow Screen Time access."
-            }
-            isRequesting = false
-        }
-        #endif
-    }
 }
 
 #Preview {
