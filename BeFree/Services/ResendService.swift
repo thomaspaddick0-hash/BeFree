@@ -6,7 +6,7 @@ final class ResendService {
     private let apiKey = Secrets.resendAPIKey
     private let fromAddress = "BeFree <onboarding@resend.dev>"
 
-    func sendCode(_ code: String, appName: String, userName: String, toEmail: String) async throws {
+    func sendCode(_ code: String, appName: String, toEmail: String) async throws {
         var req = URLRequest(url: URL(string: "https://api.resend.com/emails")!)
         req.httpMethod = "POST"
         req.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
@@ -15,8 +15,8 @@ final class ResendService {
         let body: [String: Any] = [
             "from": fromAddress,
             "to": [toEmail],
-            "subject": "Your friend needs your help — BeFree code inside",
-            "html": emailHTML(code: code, appName: appName, userName: userName)
+            "subject": "Someone is counting on you — BeFree unlock code",
+            "html": emailHTML(code: code, appName: appName)
         ]
         req.httpBody = try JSONSerialization.data(withJSONObject: body)
 
@@ -26,11 +26,11 @@ final class ResendService {
         }
     }
 
-    private func emailHTML(code: String, appName: String, userName: String) -> String {
+    private func emailHTML(code: String, appName: String) -> String {
         """
         <div style="font-family:sans-serif;max-width:480px;margin:40px auto;padding:32px;border-radius:12px;background:#f9f9f9">
           <h2 style="margin-top:0">Your friend is counting on you 🔒</h2>
-          <p><strong>\(userName)</strong> has blocked themselves from <strong>\(appName)</strong> using BeFree.</p>
+          <p>Someone has blocked themselves from <strong>\(appName)</strong> using BeFree and trusted you with their unlock code.</p>
           <p>Their unlock code is:</p>
           <div style="font-size:48px;font-weight:bold;letter-spacing:12px;text-align:center;padding:24px;background:#fff;border-radius:8px;margin:16px 0">\(code)</div>
           <p style="color:#666;font-size:14px">Only share this code when you think they've genuinely earned it. That's why they trusted you with it.</p>

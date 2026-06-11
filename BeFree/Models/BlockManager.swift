@@ -29,14 +29,13 @@ final class BlockManager: ObservableObject {
 
     func addBlock(
         appName: String,
-        selection: FamilyActivitySelection,
         domains: [String],
         friendEmail: String,
-        userName: String
+        selection: FamilyActivitySelection? = nil
     ) async throws {
         let code = String(format: "%04d", Int.random(in: 0...9999))
         let now = Date()
-        let selectionData = try JSONEncoder().encode(selection)
+        let selectionData = selection.flatMap { try? JSONEncoder().encode($0) }
 
         let block = Block(
             id: UUID(),
@@ -49,10 +48,11 @@ final class BlockManager: ObservableObject {
 
         guard let userID = supabase.currentUserID else { throw BeFreeError.notSignedIn }
         try await supabase.insertBlock(block, code: code, userID: userID)
-        try await resend.sendCode(code, appName: appName, userName: userName, toEmail: friendEmail)
+        try await resend.sendCode(code, appName: appName, toEmail: friendEmail)
 
         #if !targetEnvironment(simulator)
-        applyRestrictions(selection: selection, domains: domains)
+        if let selection { applyRestrictions(selection: selection, domains: domains) }
+        else { applyDomainsOnly(domains: domains) }
         #endif
 
         var stored = storedBlocks()
@@ -110,6 +110,10 @@ final class BlockManager: ObservableObject {
         var blocked = store.shield.applications ?? []
         blocked.formUnion(selection.applicationTokens)
         store.shield.applications = blocked
+        rebuildWebFilter()
+    }
+
+    private func applyDomainsOnly(domains: [String]) {
         rebuildWebFilter()
     }
 
