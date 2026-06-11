@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		1CD137C844C666DA0BC43155 /* ShieldConfigurationExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C29E5B04013A278BC940BE7 /* ShieldConfigurationExtension.swift */; };
+		220C13A62685F20B3613694A /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE14812653A74796340A561B /* OnboardingView.swift */; };
 		268EDB141000AEA4F1194353 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = C679C40147510A4AEC75F009 /* Supabase */; };
 		2A0F805CEAE1AB67A114D9D6 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FCEFAA98137AA9B6F8AD1B2 /* HomeView.swift */; };
 		2A4C18A18AE2457557FCD98A /* BlockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E5BAFCB7C529F667941B1 /* BlockManager.swift */; };
@@ -21,11 +22,9 @@
 		AF101358C6179F7F53867B29 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E4548E28B693FA3D655D0B3 /* Assets.xcassets */; };
 		BCD230850122EDD4D0DE3319 /* BeFreeMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C63E39A6AA25147D970D44D4 /* BeFreeMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		BD7D172B03D5C15E05738205 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D346BAC44B6597BC19C253AB /* ContentView.swift */; };
-		C88E9F2A2FD8877300EB828B /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C88E9F292FD8877300EB828B /* OnboardingView.swift */; };
 		D92321F94E220C8FB359DE3D /* UnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2F073DFD953DD7639071EEE /* UnlockView.swift */; };
 		DD0AD3262928024CAA5FF34C /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 299D7B50D986650A9A850AF3 /* Secrets.swift */; };
 		DD5BA0E5AB541D0188891A38 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52EE7061F893CF0A4E39A99D /* SupabaseService.swift */; };
-		E2C3E511BD7EEC2D62A4987E /* Secrets.example.swift in Sources */ = {isa = PBXBuildFile; fileRef = C536E9EEDF9DFC1125A172DA /* Secrets.example.swift */; };
 		E8DC6B36AB0965617E3E99E2 /* BeFreeShield.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E70B5806AB1D33131D9D216A /* BeFreeShield.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		F127531F86C213F207EBA442 /* ResendService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6554FECB9EAC14FB4ADC9BFC /* ResendService.swift */; };
 /* End PBXBuildFile section */
@@ -78,12 +77,11 @@
 		A8D7F5119967DB1805290710 /* BlockRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockRowView.swift; sourceTree = "<group>"; };
 		AFAF41E6AF75B74B73E497DA /* AddBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBlockView.swift; sourceTree = "<group>"; };
 		B515822382A841DC3F47AE94 /* ShieldActionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldActionExtension.swift; sourceTree = "<group>"; };
-		C536E9EEDF9DFC1125A172DA /* Secrets.example.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.example.swift; sourceTree = "<group>"; };
 		C63E39A6AA25147D970D44D4 /* BeFreeMonitor.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BeFreeMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
-		C88E9F292FD8877300EB828B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 		D2F073DFD953DD7639071EEE /* UnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockView.swift; sourceTree = "<group>"; };
 		D346BAC44B6597BC19C253AB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		E70B5806AB1D33131D9D216A /* BeFreeShield.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BeFreeShield.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		EE14812653A74796340A561B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -131,7 +129,6 @@
 				1E4548E28B693FA3D655D0B3 /* Assets.xcassets */,
 				A7E980152227A523FCF1DFCC /* BeFreeApp.swift */,
 				D346BAC44B6597BC19C253AB /* ContentView.swift */,
-				C536E9EEDF9DFC1125A172DA /* Secrets.example.swift */,
 				299D7B50D986650A9A850AF3 /* Secrets.swift */,
 				2E5EF4D1FBDED2AE7A701648 /* Models */,
 				F0DA73574C6A6FD4120E4288 /* Services */,
@@ -143,10 +140,10 @@
 		C492535191477625B7270826 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				C88E9F292FD8877300EB828B /* OnboardingView.swift */,
 				AFAF41E6AF75B74B73E497DA /* AddBlockView.swift */,
 				A8D7F5119967DB1805290710 /* BlockRowView.swift */,
 				8FCEFAA98137AA9B6F8AD1B2 /* HomeView.swift */,
+				EE14812653A74796340A561B /* OnboardingView.swift */,
 				D2F073DFD953DD7639071EEE /* UnlockView.swift */,
 			);
 			path = Views;
@@ -248,18 +245,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2650;
-				TargetAttributes = {
-					2AE37B61FC57CDF4052C91A9 = {
-						ProvisioningStyle = Automatic;
-					};
-					2F4CF24BC7AD1AF323C65755 = {
-						ProvisioningStyle = Automatic;
-					};
-					C80AC4A9C469945817B3C01C = {
-						ProvisioningStyle = Automatic;
-					};
-				};
+				LastUpgradeCheck = 1430;
 			};
 			buildConfigurationList = 41C7C847707D54AC012BA953 /* Build configuration list for PBXProject "BeFree" */;
 			developmentRegion = en;
@@ -309,12 +295,11 @@
 				537E50327C80CFA24806AFE9 /* BlockRowView.swift in Sources */,
 				BD7D172B03D5C15E05738205 /* ContentView.swift in Sources */,
 				2A0F805CEAE1AB67A114D9D6 /* HomeView.swift in Sources */,
+				220C13A62685F20B3613694A /* OnboardingView.swift in Sources */,
 				F127531F86C213F207EBA442 /* ResendService.swift in Sources */,
-				E2C3E511BD7EEC2D62A4987E /* Secrets.example.swift in Sources */,
 				DD0AD3262928024CAA5FF34C /* Secrets.swift in Sources */,
 				DD5BA0E5AB541D0188891A38 /* SupabaseService.swift in Sources */,
 				D92321F94E220C8FB359DE3D /* UnlockView.swift in Sources */,
-				C88E9F2A2FD8877300EB828B /* OnboardingView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -388,9 +373,9 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = HYKMNRWXBK;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -412,7 +397,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -423,6 +407,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = BeFreeMonitor/BeFreeMonitor.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = HYKMNRWXBK;
 				INFOPLIST_FILE = BeFreeMonitor/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -430,7 +416,8 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app.monitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app.BeFreeMonitor;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -440,6 +427,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = BeFreeShield/BeFreeShield.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = HYKMNRWXBK;
 				INFOPLIST_FILE = BeFreeShield/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -447,7 +436,8 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app.shield;
+				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app.BeFreeShield;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -457,6 +447,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = BeFreeShield/BeFreeShield.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = HYKMNRWXBK;
 				INFOPLIST_FILE = BeFreeShield/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -464,7 +456,8 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app.shield;
+				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app.BeFreeShield;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -474,6 +467,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CODE_SIGN_ENTITLEMENTS = BeFreeMonitor/BeFreeMonitor.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = HYKMNRWXBK;
 				INFOPLIST_FILE = BeFreeMonitor/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -481,7 +476,8 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app.monitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app.BeFreeMonitor;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -492,7 +488,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = BeFree/BeFree.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = HYKMNRWXBK;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = BeFree/Info.plist;
@@ -503,6 +500,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -513,7 +511,8 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = BeFree/BeFree.entitlements;
-				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = HYKMNRWXBK;
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = BeFree/Info.plist;
@@ -524,6 +523,7 @@
 					"@executable_path/Frameworks",
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app;
+				PROVISIONING_PROFILE_SPECIFIER = "";
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -566,9 +566,9 @@
 				COPY_PHASE_STRIP = NO;
 				CURRENT_PROJECT_VERSION = 1;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = HYKMNRWXBK;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -583,7 +583,6 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
