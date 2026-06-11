@@ -7,7 +7,10 @@ final class SupabaseService {
 
     let client = SupabaseClient(
         supabaseURL: URL(string: Secrets.supabaseURL)!,
-        supabaseKey: Secrets.supabaseAnonKey
+        supabaseKey: Secrets.supabaseAnonKey,
+        options: SupabaseClientOptions(
+            auth: SupabaseClientOptions.AuthOptions(emitLocalSessionAsInitialSession: true)
+        )
     )
 
     var currentUserID: UUID? {
