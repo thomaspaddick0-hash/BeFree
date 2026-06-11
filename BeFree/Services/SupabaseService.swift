@@ -113,8 +113,8 @@ enum BeFreeError: LocalizedError {
     var errorDescription: String? {
         switch self {
         case .serverError: return "Something went wrong. Please try again."
-        case .blockNotFound: return "Block not found."
-        case .wrongCode: return "That code is incorrect. Ask your friend again."
+        case .blockNotFound: return "Block not found — try restarting the app and unlocking again."
+        case .wrongCode: return "Incorrect code. Double-check each digit with your friend."
         case .notSignedIn: return "Not signed in. Please restart the app."
         }
     }

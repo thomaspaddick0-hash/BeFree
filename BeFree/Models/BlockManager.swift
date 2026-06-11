@@ -70,6 +70,7 @@ final class BlockManager: ObservableObject {
     }
 
     func unlock(block: Block, code: String) async throws {
+        try await supabase.signInIfNeeded()
         try await supabase.verifyAndUnlock(blockId: block.id, code: code)
 
         #if !targetEnvironment(simulator)
