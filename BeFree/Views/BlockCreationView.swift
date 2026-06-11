@@ -273,7 +273,8 @@ struct BlockCreationView: View {
             try await blockManager.addBlock(
                 appName: app.name,
                 domains: app.domains,
-                friendEmail: friendEmail.trimmingCharacters(in: .whitespaces)
+                friendEmail: friendEmail.trimmingCharacters(in: .whitespaces),
+                userName: ""
             )
             dismiss()
         } catch {
