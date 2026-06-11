@@ -8,6 +8,7 @@ struct BlockCreationView: View {
     @State private var selectedApp: AppEntry?
     @State private var step: Step = .search
     @State private var familySelection = FamilyActivitySelection()
+    @State private var authError: String?
 
     enum Step { case search, picker, email, confirm }
 
@@ -92,7 +93,7 @@ struct BlockCreationView: View {
                             #if targetEnvironment(simulator)
                             step = .email
                             #else
-                            step = .picker
+                            Task { await requestAuthAndAdvance() }
                             #endif
                         } label: {
                             HStack {
@@ -123,6 +124,11 @@ struct BlockCreationView: View {
                 Button("Cancel") { dismiss() }
             }
         }
+        .alert("Permission Required", isPresented: .constant(authError != nil), actions: {
+            Button("OK") { authError = nil }
+        }, message: {
+            Text(authError ?? "")
+        })
     }
 
     // MARK: - Step 2: App Picker
@@ -148,7 +154,7 @@ struct BlockCreationView: View {
                     .clipShape(Capsule())
                 }
 
-                Text("Once you see the checkmark next to \(selectedApp?.name ?? "the app"), tap Continue.")
+                Text("Use the search icon inside the list to find it quickly, then tap Continue.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -328,6 +334,17 @@ struct BlockCreationView: View {
     }
 
     // MARK: - Helpers
+
+    #if !targetEnvironment(simulator)
+    private func requestAuthAndAdvance() async {
+        do {
+            try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
+            step = .picker
+        } catch {
+            authError = "Screen Time permission is required to block apps. Go to Settings → Screen Time and enable it."
+        }
+    }
+    #endif
 
     private var isValidEmail: Bool {
         let t = friendEmail.trimmingCharacters(in: .whitespaces)
