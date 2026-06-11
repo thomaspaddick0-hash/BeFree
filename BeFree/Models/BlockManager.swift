@@ -29,10 +29,12 @@ final class BlockManager: ObservableObject {
 
     func addBlock(
         appName: String,
+        selection: FamilyActivitySelection? = nil,
         domains: [String],
         friendEmail: String,
-        selection: FamilyActivitySelection? = nil
+        userName: String
     ) async throws {
+        try await supabase.signInIfNeeded()
         let code = String(format: "%04d", Int.random(in: 0...9999))
         let now = Date()
         let selectionData = selection.flatMap { try? JSONEncoder().encode($0) }
@@ -48,7 +50,7 @@ final class BlockManager: ObservableObject {
 
         guard let userID = supabase.currentUserID else { throw BeFreeError.notSignedIn }
         try await supabase.insertBlock(block, code: code, userID: userID)
-        try await resend.sendCode(code, appName: appName, toEmail: friendEmail)
+        try await resend.sendCode(code, appName: appName, toEmail: friendEmail, userName: userName)
 
         #if !targetEnvironment(simulator)
         if let selection { applyRestrictions(selection: selection, domains: domains) }
