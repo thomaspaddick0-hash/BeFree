@@ -1,5 +1,4 @@
 import SwiftUI
-import FamilyControls
 
 struct BlockCreationView: View {
     @EnvironmentObject var blockManager: BlockManager
@@ -7,20 +6,16 @@ struct BlockCreationView: View {
 
     @State private var selectedApp: AppEntry?
     @State private var step: Step = .search
-    #if !targetEnvironment(simulator)
-    @State private var familySelection = FamilyActivitySelection()
-    #endif
 
-    enum Step { case search, confirm, picker, email }
+    enum Step { case search, email, confirm }
 
     var body: some View {
         NavigationStack {
             Group {
                 switch step {
-                case .search: searchStep
+                case .search:  searchStep
+                case .email:   emailStep
                 case .confirm: confirmStep
-                case .picker: pickerStep
-                case .email: emailStep
                 }
             }
             .animation(.easeInOut, value: step)
@@ -90,7 +85,7 @@ struct BlockCreationView: View {
                     List(results) { app in
                         Button {
                             selectedApp = app
-                            step = .confirm
+                            step = .email
                         } label: {
                             HStack {
                                 VStack(alignment: .leading, spacing: 2) {
@@ -122,130 +117,9 @@ struct BlockCreationView: View {
         }
     }
 
-    // MARK: - Step 2: Confirm
-
-    private var confirmStep: some View {
-        VStack(spacing: 32) {
-            Spacer()
-
-            VStack(spacing: 16) {
-                Image(systemName: "lock.shield.fill")
-                    .font(.system(size: 72))
-                    .foregroundStyle(.green)
-
-                Text(selectedApp?.name ?? "")
-                    .font(.largeTitle.bold())
-
-                VStack(spacing: 8) {
-                    Text("Once you continue, you'll need to select the app and enter a friend's email.")
-                        .multilineTextAlignment(.center)
-                        .foregroundStyle(.secondary)
-                    Text("Your friend will receive a 4-digit code — and you will no longer have access to this app or its website.")
-                        .multilineTextAlignment(.center)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
-                }
-                .padding(.horizontal)
-
-                if let domains = selectedApp?.domains, !domains.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Will also block:")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                        ForEach(domains, id: \.self) { domain in
-                            Label(domain, systemImage: "globe.badge.chevron.backward")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.quaternary)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
-                    .padding(.horizontal)
-                }
-            }
-
-            Spacer()
-
-            VStack(spacing: 12) {
-                Button {
-                    #if targetEnvironment(simulator)
-                    step = .email
-                    #else
-                    step = .picker
-                    #endif
-                } label: {
-                    Text("Continue")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 54)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
-                .padding(.horizontal)
-
-                Button("Go back") { step = .search }
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.bottom, 32)
-        }
-        .navigationTitle("Are you sure?")
-        .navigationBarTitleDisplayMode(.inline)
-    }
-
-    // MARK: - Step 3: App Picker (device only)
-
-    private var pickerStep: some View {
-        #if targetEnvironment(simulator)
-        // Never reached — confirm skips straight to .email on simulator
-        EmptyView()
-        #else
-        VStack(spacing: 0) {
-            VStack(spacing: 8) {
-                Text("Select \(selectedApp?.name ?? "the app")")
-                    .font(.largeTitle.bold())
-                    .padding(.top, 24)
-                Text("Find and tap the app below so BeFree can block it.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
-            }
-
-            FamilyActivityPicker(selection: $familySelection)
-                .frame(maxHeight: .infinity)
-
-            VStack(spacing: 12) {
-                Button {
-                    step = .email
-                } label: {
-                    Text("Continue")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 54)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
-                .disabled(familySelection.applicationTokens.isEmpty)
-                .padding(.horizontal)
-
-                Button("Go back") { step = .confirm }
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.bottom, 32)
-        }
-        .navigationTitle("Pick the app")
-        .navigationBarTitleDisplayMode(.inline)
-        #endif
-    }
-
-    // MARK: - Step 4: Friend's email
+    // MARK: - Step 2: Friend's email
 
     @State private var friendEmail = ""
-    @State private var isSubmitting = false
-    @State private var errorMessage: String?
 
     private var emailStep: some View {
         VStack(spacing: 32) {
@@ -273,6 +147,75 @@ struct BlockCreationView: View {
                     .background(.quaternary)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                     .padding(.horizontal)
+            }
+
+            Spacer()
+
+            VStack(spacing: 12) {
+                Button {
+                    step = .confirm
+                } label: {
+                    Text("Continue")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .disabled(!isValidEmail)
+                .padding(.horizontal)
+
+                Button("Go back") { step = .search }
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.bottom, 32)
+        }
+        .navigationTitle("Friend's email")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    // MARK: - Step 3: Confirm & block
+
+    @State private var isSubmitting = false
+    @State private var errorMessage: String?
+
+    private var confirmStep: some View {
+        VStack(spacing: 32) {
+            Spacer()
+
+            VStack(spacing: 20) {
+                Image(systemName: "lock.shield.fill")
+                    .font(.system(size: 72))
+                    .foregroundStyle(.green)
+
+                VStack(spacing: 8) {
+                    Text("Block \(selectedApp?.name ?? "")?")
+                        .font(.largeTitle.bold())
+                        .multilineTextAlignment(.center)
+
+                    Text("\(friendEmail) will receive the unlock code. You won't be able to access \(selectedApp?.name ?? "the app") or its website until they share it with you.")
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal)
+                }
+
+                if let domains = selectedApp?.domains, !domains.isEmpty {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Also blocking:")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        ForEach(domains, id: \.self) { domain in
+                            Label(domain, systemImage: "globe.badge.chevron.backward")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
+                    .padding(12)
+                    .frame(maxWidth: .infinity, alignment: .leading)
+                    .background(.quaternary)
+                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                    .padding(.horizontal)
+                }
 
                 if let errorMessage {
                     Text(errorMessage)
@@ -293,7 +236,7 @@ struct BlockCreationView: View {
                         if isSubmitting {
                             ProgressView().tint(.white)
                         } else {
-                            Text("Finish & Block")
+                            Text("Yes, block it")
                                 .font(.headline)
                         }
                     }
@@ -302,27 +245,23 @@ struct BlockCreationView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
-                .disabled(!isValidEmail || isSubmitting)
+                .disabled(isSubmitting)
                 .padding(.horizontal)
 
-                Button("Go back") {
-                    #if targetEnvironment(simulator)
-                    step = .confirm
-                    #else
-                    step = .picker
-                    #endif
-                }
-                .foregroundStyle(.secondary)
+                Button("Go back") { step = .email }
+                    .foregroundStyle(.secondary)
             }
             .padding(.bottom, 32)
         }
-        .navigationTitle("Friend's email")
+        .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
     }
 
+    // MARK: - Helpers
+
     private var isValidEmail: Bool {
-        let trimmed = friendEmail.trimmingCharacters(in: .whitespaces)
-        return trimmed.contains("@") && trimmed.contains(".")
+        let t = friendEmail.trimmingCharacters(in: .whitespaces)
+        return t.contains("@") && t.contains(".")
     }
 
     private func submit() async {
@@ -330,22 +269,12 @@ struct BlockCreationView: View {
         isSubmitting = true
         errorMessage = nil
         do {
-            #if targetEnvironment(simulator)
             try await blockManager.addBlock(
                 appName: app.name,
                 domains: app.domains,
                 friendEmail: friendEmail.trimmingCharacters(in: .whitespaces),
                 userName: ""
             )
-            #else
-            try await blockManager.addBlock(
-                appName: app.name,
-                selection: familySelection.applicationTokens.isEmpty ? nil : familySelection,
-                domains: app.domains,
-                friendEmail: friendEmail.trimmingCharacters(in: .whitespaces),
-                userName: ""
-            )
-            #endif
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
