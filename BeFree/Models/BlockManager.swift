@@ -8,12 +8,17 @@ final class BlockManager: ObservableObject {
     @Published var activeBlocks: [Block] = []
     @Published var pendingUnlockDeepLink = false
 
-    private let store = ManagedSettingsStore()
-    private let activityCenter = DeviceActivityCenter()
+    // Lazy so the XPC connection isn't attempted until first use.
+    // All access sites are guarded with #if !targetEnvironment(simulator)
+    // because these services are unavailable in the simulator.
+    #if !targetEnvironment(simulator)
+    private lazy var store = ManagedSettingsStore()
+    private lazy var activityCenter = DeviceActivityCenter()
+    private let activityName = DeviceActivityName("befreeRestrictions")
+    #endif
+
     private let supabase = SupabaseService.shared
     private let resend = ResendService.shared
-
-    // Shared App Group UserDefaults — also read by the Shield extension
     private let sharedDefaults = UserDefaults(suiteName: "group.com.befree.app")!
 
     func loadBlocks() async {
@@ -31,8 +36,6 @@ final class BlockManager: ObservableObject {
     ) async throws {
         let code = String(format: "%04d", Int.random(in: 0...9999))
         let now = Date()
-
-        // Persist selection data for re-applying on relaunch
         let selectionData = try JSONEncoder().encode(selection)
 
         let block = Block(
@@ -44,39 +47,36 @@ final class BlockManager: ObservableObject {
             activitySelectionData: selectionData
         )
 
-        // Save to Supabase (stores hashed code)
         guard let userID = supabase.currentUserID else { throw BeFreeError.notSignedIn }
         try await supabase.insertBlock(block, code: code, userID: userID)
-
-        // Email the code to the friend
         try await resend.sendCode(code, appName: appName, userName: userName, toEmail: friendEmail)
 
-        // Apply restrictions
+        #if !targetEnvironment(simulator)
         applyRestrictions(selection: selection, domains: domains)
+        #endif
 
-        // Persist block timestamp for Shield extension stopwatch
         var stored = storedBlocks()
         stored[block.id.uuidString] = now
-        sharedDefaults.set(
-            try? JSONEncoder().encode(stored),
-            forKey: "blockedAt"
-        )
+        sharedDefaults.set(try? JSONEncoder().encode(stored), forKey: "blockedAt")
 
         activeBlocks.append(block)
         saveStoredSelections()
+
+        #if !targetEnvironment(simulator)
         startMonitoringIfNeeded()
+        #endif
     }
 
     func unlock(block: Block, code: String) async throws {
         try await supabase.verifyAndUnlock(blockId: block.id, code: code)
 
-        // Only remove restrictions for this specific block's apps
+        #if !targetEnvironment(simulator)
         if let data = block.activitySelectionData,
            let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) {
             store.shield.applications?.subtract(selection.applicationTokens)
         }
-        // Rebuild web filter from remaining active blocks
         rebuildWebFilter()
+        #endif
 
         var stored = storedBlocks()
         stored.removeValue(forKey: block.id.uuidString)
@@ -84,14 +84,15 @@ final class BlockManager: ObservableObject {
 
         activeBlocks.removeAll { $0.id == block.id }
         saveStoredSelections()
+
+        #if !targetEnvironment(simulator)
         if activeBlocks.isEmpty {
             activityCenter.stopMonitoring([activityName])
         }
+        #endif
     }
 
     // MARK: - Private
-
-    private let activityName = DeviceActivityName("befreeRestrictions")
 
     private func saveStoredSelections() {
         let selections = activeBlocks.map { block in
@@ -104,20 +105,11 @@ final class BlockManager: ObservableObject {
         sharedDefaults.set(try? JSONEncoder().encode(selections), forKey: "storedSelections")
     }
 
-    private func startMonitoringIfNeeded() {
-        let schedule = DeviceActivitySchedule(
-            intervalStart: DateComponents(hour: 0, minute: 0),
-            intervalEnd: DateComponents(hour: 23, minute: 59),
-            repeats: true
-        )
-        try? activityCenter.startMonitoring(activityName, during: schedule)
-    }
-
+    #if !targetEnvironment(simulator)
     private func applyRestrictions(selection: FamilyActivitySelection, domains: [String]) {
         var blocked = store.shield.applications ?? []
         blocked.formUnion(selection.applicationTokens)
         store.shield.applications = blocked
-
         rebuildWebFilter()
     }
 
@@ -128,6 +120,16 @@ final class BlockManager: ObservableObject {
             : .specific(Set(allDomains.map { WebDomain(domain: $0) }))
     }
 
+    private func startMonitoringIfNeeded() {
+        let schedule = DeviceActivitySchedule(
+            intervalStart: DateComponents(hour: 0, minute: 0),
+            intervalEnd: DateComponents(hour: 23, minute: 59),
+            repeats: true
+        )
+        try? activityCenter.startMonitoring(activityName, during: schedule)
+    }
+    #endif
+
     private func storedBlocks() -> [String: Date] {
         guard let data = sharedDefaults.data(forKey: "blockedAt"),
               let decoded = try? JSONDecoder().decode([String: Date].self, from: data)
@@ -136,7 +138,6 @@ final class BlockManager: ObservableObject {
     }
 }
 
-// Shared structure — must match the definition in DeviceActivityMonitorExtension.swift
 private struct StoredSelection: Codable {
     let blockId: String
     let selectionData: Data?

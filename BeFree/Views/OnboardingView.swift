@@ -95,6 +95,9 @@ struct OnboardingView: View {
     }
 
     private func requestAuthorization() {
+        #if targetEnvironment(simulator)
+        onComplete()
+        #else
         isRequesting = true
         authError = nil
         Task {
@@ -106,6 +109,7 @@ struct OnboardingView: View {
             }
             isRequesting = false
         }
+        #endif
     }
 }
 
