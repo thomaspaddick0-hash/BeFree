@@ -10,45 +10,51 @@ struct BlockCreationView: View {
     @State private var familySelection = FamilyActivitySelection()
     @State private var authError: String?
 
-    enum Step { case search, picker, email, confirm }
+    enum Step { case search, picker, email }
 
     var body: some View {
         NavigationStack {
             Group {
                 switch step {
-                case .search:  searchStep
-                case .picker:  pickerStep
-                case .email:   emailStep
-                case .confirm: confirmStep
+                case .search: searchStep
+                case .picker: pickerStep
+                case .email:  emailStep
                 }
             }
             .animation(.easeInOut, value: step)
         }
     }
 
-    // MARK: - Step 1: Search
+    // MARK: - Step 1: Choose App
 
     @State private var query = ""
+    @FocusState private var searchFocused: Bool
 
     private var searchStep: some View {
-        VStack(alignment: .leading, spacing: 0) {
-            VStack(alignment: .leading, spacing: 8) {
-                Text("What do you want")
+        VStack(spacing: 0) {
+            // Header
+            VStack(alignment: .leading, spacing: 6) {
+                Text("Choose an app")
                     .font(.largeTitle.bold())
-                Text("to be free of?")
+                Text("to block")
                     .font(.largeTitle.bold())
                     .foregroundStyle(.green)
             }
-            .padding(.horizontal)
-            .padding(.top, 24)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 24)
+            .padding(.top, 28)
             .padding(.bottom, 20)
 
-            HStack {
+            // Prominent search bar
+            HStack(spacing: 12) {
                 Image(systemName: "magnifyingglass")
-                    .foregroundStyle(.secondary)
-                TextField("e.g. Instagram", text: $query)
+                    .font(.title3)
+                    .foregroundStyle(searchFocused || !query.isEmpty ? .green : .secondary)
+                TextField("Search apps…", text: $query)
+                    .font(.body)
                     .autocorrectionDisabled()
                     .textInputAutocapitalization(.never)
+                    .focused($searchFocused)
                 if !query.isEmpty {
                     Button { query = "" } label: {
                         Image(systemName: "xmark.circle.fill")
@@ -56,48 +62,58 @@ struct BlockCreationView: View {
                     }
                 }
             }
-            .padding(12)
-            .background(.quaternary)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
-            .padding(.horizontal)
+            .padding(.horizontal, 18)
+            .padding(.vertical, 16)
+            .background(
+                RoundedRectangle(cornerRadius: 16)
+                    .fill(.quaternary)
+                    .overlay(
+                        RoundedRectangle(cornerRadius: 16)
+                            .stroke(searchFocused ? Color.green.opacity(0.5) : Color.clear, lineWidth: 2)
+                    )
+            )
+            .padding(.horizontal, 24)
+            .onTapGesture { searchFocused = true }
 
+            // Results / placeholder
             if query.isEmpty {
                 Spacer()
-                VStack(spacing: 8) {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 48))
-                        .foregroundStyle(.quaternary)
-                    Text("Start typing to search")
-                        .foregroundStyle(.secondary)
+                VStack(spacing: 10) {
+                    Image(systemName: "iphone.and.arrow.forward")
+                        .font(.system(size: 52))
+                        .foregroundStyle(.green.opacity(0.25))
+                    Text("Type to find the app\nyou want to quit")
+                        .font(.subheadline)
+                        .foregroundStyle(.tertiary)
+                        .multilineTextAlignment(.center)
                 }
-                .frame(maxWidth: .infinity)
                 Spacer()
             } else {
                 let results = AppDomainMap.search(query)
                 if results.isEmpty {
                     Spacer()
-                    VStack(spacing: 8) {
+                    VStack(spacing: 10) {
                         Image(systemName: "questionmark.circle")
-                            .font(.system(size: 48))
+                            .font(.system(size: 52))
                             .foregroundStyle(.quaternary)
                         Text("No results for \"\(query)\"")
                             .foregroundStyle(.secondary)
                     }
-                    .frame(maxWidth: .infinity)
                     Spacer()
                 } else {
                     List(results) { app in
                         Button {
                             selectedApp = app
                             familySelection = FamilyActivitySelection()
+                            searchFocused = false
                             #if targetEnvironment(simulator)
                             step = .email
                             #else
                             Task { await requestAuthAndAdvance() }
                             #endif
                         } label: {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
+                            HStack(spacing: 12) {
+                                VStack(alignment: .leading, spacing: 3) {
                                     Text(app.name)
                                         .font(.headline)
                                         .foregroundStyle(.primary)
@@ -107,10 +123,10 @@ struct BlockCreationView: View {
                                 }
                                 Spacer()
                                 Image(systemName: "chevron.right")
-                                    .font(.caption)
+                                    .font(.caption.weight(.semibold))
                                     .foregroundStyle(.tertiary)
                             }
-                            .padding(.vertical, 4)
+                            .padding(.vertical, 6)
                         }
                     }
                     .listStyle(.plain)
@@ -129,17 +145,21 @@ struct BlockCreationView: View {
         }, message: {
             Text(authError ?? "")
         })
+        .onAppear { searchFocused = true }
     }
 
-    // MARK: - Step 2: App Picker
+    // MARK: - Step 2: Apple Picker
 
     private var pickerStep: some View {
+        #if targetEnvironment(simulator)
+        EmptyView()
+        #else
         VStack(spacing: 0) {
-            // Instruction banner
-            VStack(spacing: 6) {
-                Text("Tap \(selectedApp?.name ?? "the app") to select it")
+            VStack(spacing: 8) {
+                Text("Select \(selectedApp?.name ?? "the app")")
                     .font(.title2.bold())
                     .multilineTextAlignment(.center)
+                    .padding(.top, 20)
 
                 if let category = selectedApp?.iosCategory {
                     HStack(spacing: 6) {
@@ -154,22 +174,19 @@ struct BlockCreationView: View {
                     .clipShape(Capsule())
                 }
 
-                Text("Use the search icon inside the list to find it quickly, then tap Continue.")
+                Text("Use the search icon inside the list, then tap Continue.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal)
+                    .padding(.bottom, 8)
             }
-            .padding(.top, 20)
-            .padding(.bottom, 12)
 
             FamilyActivityPicker(selection: $familySelection)
                 .frame(maxHeight: .infinity)
 
             VStack(spacing: 12) {
-                Button {
-                    step = .email
-                } label: {
+                Button { step = .email } label: {
                     Text("Continue")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
@@ -187,44 +204,52 @@ struct BlockCreationView: View {
         }
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
+        #endif
     }
 
-    // MARK: - Step 3: Friend's email
+    // MARK: - Step 3: Friend's Email + Confirm modal
 
     @State private var friendEmail = ""
+    @State private var showingConfirm = false
+    @State private var isSubmitting = false
+    @State private var errorMessage: String?
 
     private var emailStep: some View {
-        VStack(spacing: 32) {
+        VStack(spacing: 0) {
             Spacer()
 
-            VStack(spacing: 16) {
+            VStack(spacing: 20) {
                 Image(systemName: "envelope.fill")
                     .font(.system(size: 64))
                     .foregroundStyle(.blue)
 
-                Text("Who's holding\nyour code?")
-                    .font(.largeTitle.bold())
-                    .multilineTextAlignment(.center)
+                VStack(spacing: 8) {
+                    Text("Who's holding\nyour code?")
+                        .font(.largeTitle.bold())
+                        .multilineTextAlignment(.center)
 
-                Text("Enter a trusted friend's email. They'll receive the 4-digit code that unlocks \(selectedApp?.name ?? "the app").")
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal)
+                    Text("Enter a trusted friend's email. They'll receive the 4-digit code that unlocks \(selectedApp?.name ?? "the app").")
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal)
+                }
 
                 TextField("friend@example.com", text: $friendEmail)
                     .textInputAutocapitalization(.never)
                     .keyboardType(.emailAddress)
                     .autocorrectionDisabled()
-                    .padding(14)
+                    .padding(16)
                     .background(.quaternary)
-                    .clipShape(RoundedRectangle(cornerRadius: 12))
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
                     .padding(.horizontal)
             }
 
             Spacer()
 
             VStack(spacing: 12) {
-                Button { step = .confirm } label: {
+                Button {
+                    showingConfirm = true
+                } label: {
                     Text("Continue")
                         .font(.headline)
                         .frame(maxWidth: .infinity)
@@ -248,63 +273,43 @@ struct BlockCreationView: View {
         }
         .navigationTitle("Friend's email")
         .navigationBarTitleDisplayMode(.inline)
+        .sheet(isPresented: $showingConfirm) {
+            confirmSheet
+                .presentationDetents([.fraction(0.52)])
+                .presentationCornerRadius(28)
+                .presentationDragIndicator(.visible)
+        }
     }
 
-    // MARK: - Step 4: Confirm
+    // MARK: - Confirm modal sheet
 
-    @State private var isSubmitting = false
-    @State private var errorMessage: String?
-
-    private var confirmStep: some View {
-        VStack(spacing: 32) {
-            Spacer()
-
-            VStack(spacing: 20) {
+    private var confirmSheet: some View {
+        VStack(spacing: 28) {
+            VStack(spacing: 12) {
                 Image(systemName: "lock.shield.fill")
-                    .font(.system(size: 72))
+                    .font(.system(size: 52))
                     .foregroundStyle(.green)
 
-                VStack(spacing: 8) {
-                    Text("Block \(selectedApp?.name ?? "")?")
-                        .font(.largeTitle.bold())
-                        .multilineTextAlignment(.center)
+                Text("Block \(selectedApp?.name ?? "")?")
+                    .font(.title2.bold())
+                    .multilineTextAlignment(.center)
 
-                    Text("\(friendEmail) will receive the unlock code. You won't be able to access \(selectedApp?.name ?? "the app") or its website until they share it with you.")
-                        .multilineTextAlignment(.center)
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal)
-                }
-
-                if let domains = selectedApp?.domains, !domains.isEmpty {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("Also blocking:")
-                            .font(.caption.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                        ForEach(domains, id: \.self) { domain in
-                            Label(domain, systemImage: "globe.badge.chevron.backward")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                    }
-                    .padding(12)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(.quaternary)
-                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                Text("\(friendEmail) will receive the unlock code.\nYou won't be able to access \(selectedApp?.name ?? "the app") until they share it.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
                     .padding(.horizontal)
-                }
-
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(.subheadline)
-                        .foregroundStyle(.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
             }
 
-            Spacer()
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.subheadline)
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+            }
 
-            VStack(spacing: 12) {
+            VStack(spacing: 10) {
                 Button {
                     Task { await submit() }
                 } label: {
@@ -312,7 +317,7 @@ struct BlockCreationView: View {
                         if isSubmitting {
                             ProgressView().tint(.white)
                         } else {
-                            Text("Yes, block it")
+                            Text("Confirm")
                                 .font(.headline)
                         }
                     }
@@ -324,13 +329,14 @@ struct BlockCreationView: View {
                 .disabled(isSubmitting)
                 .padding(.horizontal)
 
-                Button("Go back") { step = .email }
-                    .foregroundStyle(.secondary)
+                Button("Cancel") {
+                    showingConfirm = false
+                }
+                .foregroundStyle(.secondary)
             }
-            .padding(.bottom, 32)
         }
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
+        .padding(.top, 8)
+        .padding(.bottom, 24)
     }
 
     // MARK: - Helpers
@@ -372,6 +378,7 @@ struct BlockCreationView: View {
                 userName: ""
             )
             #endif
+            showingConfirm = false
             dismiss()
         } catch {
             errorMessage = error.localizedDescription

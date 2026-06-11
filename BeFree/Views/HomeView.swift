@@ -6,25 +6,27 @@ struct HomeView: View {
     @State private var deepLinkUnlockBlock: Block?
 
     var body: some View {
-        ZStack(alignment: .bottomTrailing) {
+        VStack(spacing: 0) {
             if blockManager.activeBlocks.isEmpty {
-                emptyState
+                Spacer()
+                addButton
+                Spacer()
             } else {
-                blockCards
-            }
+                ScrollView {
+                    VStack(spacing: 16) {
+                        ForEach(blockManager.activeBlocks) { block in
+                            FreeFromCard(block: block)
+                        }
+                    }
+                    .padding()
+                    .padding(.bottom, 8)
+                }
 
-            Button {
-                showingBlockCreation = true
-            } label: {
-                Image(systemName: "plus")
-                    .font(.title2.bold())
-                    .foregroundStyle(.white)
-                    .frame(width: 64, height: 64)
-                    .background(.green)
-                    .clipShape(Circle())
-                    .shadow(color: .green.opacity(0.4), radius: 8, x: 0, y: 4)
+                Divider()
+
+                addButton
+                    .padding(.vertical, 28)
             }
-            .padding(24)
         }
         .navigationTitle("BeFree")
         .navigationBarTitleDisplayMode(.large)
@@ -41,33 +43,22 @@ struct HomeView: View {
         }
     }
 
-    private var emptyState: some View {
-        VStack(spacing: 20) {
-            Spacer()
-            Image(systemName: "lock.open")
-                .font(.system(size: 64))
-                .foregroundStyle(.quaternary)
-            VStack(spacing: 8) {
-                Text("You're in control")
-                    .font(.title2.bold())
-                Text("Tap + to block an app and send\nthe unlock code to a trusted friend.")
-                    .multilineTextAlignment(.center)
-                    .foregroundStyle(.secondary)
+    private var addButton: some View {
+        VStack(spacing: 14) {
+            Button {
+                showingBlockCreation = true
+            } label: {
+                Image(systemName: "plus")
+                    .font(.system(size: 44, weight: .bold))
+                    .foregroundStyle(.white)
+                    .frame(width: 120, height: 120)
+                    .background(Color.green)
+                    .clipShape(Circle())
+                    .shadow(color: .green.opacity(0.35), radius: 20, x: 0, y: 8)
             }
-            Spacer()
-        }
-        .frame(maxWidth: .infinity)
-    }
-
-    private var blockCards: some View {
-        ScrollView {
-            VStack(spacing: 16) {
-                ForEach(blockManager.activeBlocks) { block in
-                    FreeFromCard(block: block)
-                }
-            }
-            .padding()
-            .padding(.bottom, 100)
+            Text("Block an app")
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(.secondary)
         }
     }
 }
