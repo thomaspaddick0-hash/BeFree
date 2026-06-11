@@ -1,4 +1,5 @@
 import SwiftUI
+import FamilyControls
 
 struct BlockCreationView: View {
     @EnvironmentObject var blockManager: BlockManager
@@ -6,8 +7,11 @@ struct BlockCreationView: View {
 
     @State private var selectedApp: AppEntry?
     @State private var step: Step = .search
+    #if !targetEnvironment(simulator)
+    @State private var familySelection = FamilyActivitySelection()
+    #endif
 
-    enum Step { case search, confirm, email }
+    enum Step { case search, confirm, picker, email }
 
     var body: some View {
         NavigationStack {
@@ -15,6 +19,7 @@ struct BlockCreationView: View {
                 switch step {
                 case .search: searchStep
                 case .confirm: confirmStep
+                case .picker: pickerStep
                 case .email: emailStep
                 }
             }
@@ -132,10 +137,10 @@ struct BlockCreationView: View {
                     .font(.largeTitle.bold())
 
                 VStack(spacing: 8) {
-                    Text("Once you continue, you'll need to enter a friend's email.")
+                    Text("Once you continue, you'll need to select the app and enter a friend's email.")
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
-                    Text("When you confirm, your friend will receive a 4-digit code — and you will no longer have access to this app or its website.")
+                    Text("Your friend will receive a 4-digit code — and you will no longer have access to this app or its website.")
                         .multilineTextAlignment(.center)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -165,7 +170,11 @@ struct BlockCreationView: View {
 
             VStack(spacing: 12) {
                 Button {
+                    #if targetEnvironment(simulator)
                     step = .email
+                    #else
+                    step = .picker
+                    #endif
                 } label: {
                     Text("Continue")
                         .font(.headline)
@@ -176,10 +185,8 @@ struct BlockCreationView: View {
                 .tint(.green)
                 .padding(.horizontal)
 
-                Button("Go back") {
-                    step = .search
-                }
-                .foregroundStyle(.secondary)
+                Button("Go back") { step = .search }
+                    .foregroundStyle(.secondary)
             }
             .padding(.bottom, 32)
         }
@@ -187,7 +194,54 @@ struct BlockCreationView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    // MARK: - Step 3: Friend's email
+    // MARK: - Step 3: App Picker (device only)
+
+    private var pickerStep: some View {
+        #if targetEnvironment(simulator)
+        // Never reached — confirm skips straight to .email on simulator
+        EmptyView()
+        #else
+        VStack(spacing: 0) {
+            VStack(spacing: 8) {
+                Text("Select \(selectedApp?.name ?? "the app")")
+                    .font(.largeTitle.bold())
+                    .padding(.top, 24)
+                Text("Find and tap the app below so BeFree can block it.")
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+            }
+
+            FamilyActivityPicker(selection: $familySelection)
+                .frame(maxHeight: .infinity)
+
+            VStack(spacing: 12) {
+                Button {
+                    step = .email
+                } label: {
+                    Text("Continue")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .disabled(familySelection.applicationTokens.isEmpty)
+                .padding(.horizontal)
+
+                Button("Go back") { step = .confirm }
+                    .foregroundStyle(.secondary)
+            }
+            .padding(.bottom, 32)
+        }
+        .navigationTitle("Pick the app")
+        .navigationBarTitleDisplayMode(.inline)
+        #endif
+    }
+
+    // MARK: - Step 4: Friend's email
 
     @State private var friendEmail = ""
     @State private var isSubmitting = false
@@ -251,8 +305,14 @@ struct BlockCreationView: View {
                 .disabled(!isValidEmail || isSubmitting)
                 .padding(.horizontal)
 
-                Button("Go back") { step = .confirm }
-                    .foregroundStyle(.secondary)
+                Button("Go back") {
+                    #if targetEnvironment(simulator)
+                    step = .confirm
+                    #else
+                    step = .picker
+                    #endif
+                }
+                .foregroundStyle(.secondary)
             }
             .padding(.bottom, 32)
         }
@@ -270,12 +330,22 @@ struct BlockCreationView: View {
         isSubmitting = true
         errorMessage = nil
         do {
+            #if targetEnvironment(simulator)
             try await blockManager.addBlock(
                 appName: app.name,
                 domains: app.domains,
                 friendEmail: friendEmail.trimmingCharacters(in: .whitespaces),
                 userName: ""
             )
+            #else
+            try await blockManager.addBlock(
+                appName: app.name,
+                selection: familySelection.applicationTokens.isEmpty ? nil : familySelection,
+                domains: app.domains,
+                friendEmail: friendEmail.trimmingCharacters(in: .whitespaces),
+                userName: ""
+            )
+            #endif
             dismiss()
         } catch {
             errorMessage = error.localizedDescription
