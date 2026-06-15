@@ -109,7 +109,11 @@ struct BlockCreationView: View {
                             #if targetEnvironment(simulator)
                             step = .email
                             #else
-                            Task { await requestAuthAndAdvance() }
+                            if ProcessInfo.processInfo.isiOSAppOnMac {
+                                step = .email
+                            } else {
+                                Task { await requestAuthAndAdvance() }
+                            }
                             #endif
                         } label: {
                             HStack(spacing: 12) {
