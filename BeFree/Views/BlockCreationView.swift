@@ -1,8 +1,5 @@
 import SwiftUI
 import FamilyControls
-#if targetEnvironment(macCatalyst)
-import AppKit
-#endif
 
 struct BlockCreationView: View {
     @EnvironmentObject var blockManager: BlockManager
@@ -150,11 +147,11 @@ struct BlockCreationView: View {
             }
             Button("Cancel", role: .cancel) { authError = nil }
         }, message: {
-            #if targetEnvironment(macCatalyst)
-            Text("Click 'Open Settings' to open System Settings. Go to Screen Time, find BeFree in the app list, and enable access.")
-            #else
-            Text("Tap 'Open Settings', then go to Screen Time → BeFree to grant access.")
-            #endif
+            if ProcessInfo.processInfo.isiOSAppOnMac {
+                Text("1. Click OK to open System Settings.\n2. Go to Screen Time.\n3. Find BeFree in the app list and enable it.")
+            } else {
+                Text("Tap 'Open Settings', then go to Screen Time → BeFree to grant access.")
+            }
         })
         .onAppear { searchFocused = true }
     }
@@ -379,29 +376,32 @@ struct BlockCreationView: View {
     #endif
 
     private func openScreenTimeSettings() {
-        #if targetEnvironment(macCatalyst)
-        // On Mac, use NSWorkspace to open System Settings.
-        // Try Ventura/Sonoma identifier first, then Monterey, then root.
-        let candidates = [
-            "x-apple.systempreferences:com.apple.Screen-Time-Settings.extension",
-            "x-apple.systempreferences:com.apple.preference.screentime",
-            "x-apple.systempreferences:"
-        ]
-        for string in candidates {
-            if let url = URL(string: string) {
-                NSWorkspace.shared.open(url)
-                return
+        if ProcessInfo.processInfo.isiOSAppOnMac {
+            // Running as "Designed for iPhone" on Mac.
+            // UIApplication.openSettingsURLString produces the "Touch Alternatives" window,
+            // so we try x-apple.systempreferences URLs instead — these open System Settings.
+            let candidates = [
+                "x-apple.systempreferences:com.apple.Screen-Time-Settings.extension",
+                "x-apple.systempreferences:com.apple.preference.screentime",
+                "x-apple.systempreferences:"
+            ]
+            func tryNext(_ index: Int) {
+                guard index < candidates.count,
+                      let url = URL(string: candidates[index]) else { return }
+                UIApplication.shared.open(url) { success in
+                    if !success { tryNext(index + 1) }
+                }
+            }
+            tryNext(0)
+        } else {
+            // On real iPhone, try App-Prefs:SCREEN_TIME; fall back to app settings.
+            guard let url = URL(string: "App-Prefs:SCREEN_TIME") else { return }
+            UIApplication.shared.open(url) { success in
+                if !success, let fallback = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(fallback)
+                }
             }
         }
-        #else
-        // On iOS, try App-Prefs:SCREEN_TIME directly; fall back to app settings.
-        guard let screenTimeURL = URL(string: "App-Prefs:SCREEN_TIME") else { return }
-        UIApplication.shared.open(screenTimeURL) { success in
-            if !success, let fallback = URL(string: UIApplication.openSettingsURLString) {
-                UIApplication.shared.open(fallback)
-            }
-        }
-        #endif
     }
 
     private var isValidEmail: Bool {
