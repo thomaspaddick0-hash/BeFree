@@ -85,6 +85,9 @@ struct BlockCreationView: View {
             }
         })
         .onAppear { requestAuthIfNeeded() }
+        .sheet(isPresented: $showingAppConfirm) {
+            appConfirmSheet
+        }
     }
 
     // MARK: Header
@@ -181,7 +184,7 @@ struct BlockCreationView: View {
         VStack(spacing: 0) {
             Divider()
             Button {
-                step = .email
+                showingAppConfirm = true
             } label: {
                 Text("Continue")
                     .font(.headline)
@@ -210,11 +213,11 @@ struct BlockCreationView: View {
     // MARK: - Step 2: Friend's Email + Confirm modal
 
     @State private var friendEmail = ""
-    @State private var appQuery = ""
+    @State private var confirmedEntry: AppEntry?
+    @State private var showingAppConfirm = false
     @State private var showingConfirm = false
     @State private var isSubmitting = false
     @State private var errorMessage: String?
-    @FocusState private var appFieldFocused: Bool
 
     private var emailStep: some View {
         VStack(spacing: 0) {
@@ -226,55 +229,30 @@ struct BlockCreationView: View {
                     .foregroundStyle(.blue)
 
                 VStack(spacing: 8) {
-                    Text("Almost there")
+                    Text("Who's holding\nyour code?")
                         .font(.largeTitle.bold())
                         .multilineTextAlignment(.center)
 
-                    Text("Confirm which app you blocked (so we can block its website too), then add a trusted friend's email for the unlock code.")
+                    Text("Enter a trusted friend's email. They'll receive the 4-digit code that unlocks \(resolvedName).")
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
                         .padding(.horizontal)
                 }
 
-                VStack(alignment: .leading, spacing: 16) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Which app did you block?")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.secondary)
-
-                        TextField("e.g. Instagram", text: $appQuery)
-                            .autocorrectionDisabled()
-                            .textInputAutocapitalization(.words)
-                            .focused($appFieldFocused)
-                            .padding(16)
-                            .background(.quaternary)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-
-                        appSuggestions
-                    }
-
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Friend's email")
-                            .font(.subheadline.weight(.medium))
-                            .foregroundStyle(.secondary)
-
-                        TextField("friend@example.com", text: $friendEmail)
-                            .textInputAutocapitalization(.never)
-                            .keyboardType(.emailAddress)
-                            .autocorrectionDisabled()
-                            .padding(16)
-                            .background(.quaternary)
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                    }
-                }
-                .padding(.horizontal)
+                TextField("friend@example.com", text: $friendEmail)
+                    .textInputAutocapitalization(.never)
+                    .keyboardType(.emailAddress)
+                    .autocorrectionDisabled()
+                    .padding(16)
+                    .background(.quaternary)
+                    .clipShape(RoundedRectangle(cornerRadius: 14))
+                    .padding(.horizontal)
             }
 
             Spacer()
 
             VStack(spacing: 12) {
                 Button {
-                    appFieldFocused = false
                     showingConfirm = true
                 } label: {
                     Text("Continue")
@@ -284,7 +262,7 @@ struct BlockCreationView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
-                .disabled(!isValidEmail || appQuery.trimmingCharacters(in: .whitespaces).isEmpty)
+                .disabled(!isValidEmail)
                 .padding(.horizontal)
 
                 Button("Go back") { step = .choose }
@@ -292,7 +270,7 @@ struct BlockCreationView: View {
             }
             .padding(.bottom, 32)
         }
-        .navigationTitle("Confirm block")
+        .navigationTitle("Friend's email")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingConfirm) {
             if #available(iOS 16.4, *) {
@@ -308,59 +286,109 @@ struct BlockCreationView: View {
         }
     }
 
-    // MARK: App autocomplete
+    // MARK: - Post-pick confirmation (identify the app for domain blocking)
 
-    @ViewBuilder
-    private var appSuggestions: some View {
-        let query = appQuery.trimmingCharacters(in: .whitespaces)
-        let matches = Array(AppDomainMap.search(query).prefix(4))
-        let isExactMatch = matches.contains { $0.name.caseInsensitiveCompare(query) == .orderedSame }
-
-        if appFieldFocused, !query.isEmpty, !matches.isEmpty, !isExactMatch {
+    private var appConfirmSheet: some View {
+        NavigationStack {
             VStack(spacing: 0) {
-                ForEach(matches) { entry in
-                    Button {
-                        appQuery = entry.name
-                        appFieldFocused = false
-                    } label: {
-                        HStack {
-                            Text(entry.name)
-                                .foregroundStyle(.primary)
-                            Spacer()
-                            Text(entry.domains.first ?? "")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                        }
-                        .padding(.vertical, 11)
-                        .padding(.horizontal, 16)
-                        .contentShape(Rectangle())
+                VStack(spacing: 12) {
+                    #if !targetEnvironment(simulator)
+                    ForEach(Array(familySelection.applicationTokens), id: \.self) { token in
+                        Label(token)
+                            .font(.title3.weight(.semibold))
+                            .labelStyle(.titleAndIcon)
                     }
-                    .buttonStyle(.plain)
+                    #endif
 
-                    if entry.id != matches.last?.id {
-                        Divider().padding(.leading, 16)
+                    Text("Which app did you pick?")
+                        .font(.title2.bold())
+                        .multilineTextAlignment(.center)
+
+                    Text("Tap the matching app so we can block its website too. The app itself is already shielded by Screen Time.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal)
+                }
+                .padding(.top, 24)
+                .padding(.bottom, 8)
+
+                List {
+                    ForEach(sortedApps) { entry in
+                        Button { confirmedEntry = entry } label: {
+                            HStack(spacing: 14) {
+                                let icon = appIcon(for: entry.category)
+                                iconTile(icon.0, tint: icon.1)
+                                VStack(alignment: .leading, spacing: 2) {
+                                    Text(entry.name)
+                                        .font(.body.weight(.medium))
+                                        .foregroundStyle(.primary)
+                                    Text(entry.domains.first ?? "")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                }
+                                Spacer()
+                                if confirmedEntry?.id == entry.id {
+                                    Image(systemName: "checkmark")
+                                        .font(.body.weight(.bold))
+                                        .foregroundStyle(.green)
+                                }
+                            }
+                            .contentShape(Rectangle())
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
+                .listStyle(.plain)
+
+                Button {
+                    showingAppConfirm = false
+                    step = .email
+                } label: {
+                    Text(confirmedEntry == nil ? "Select the app above" : "Confirm \(confirmedEntry!.name)")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 54)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+                .disabled(confirmedEntry == nil)
+                .padding(.horizontal, 24)
+                .padding(.vertical, 12)
             }
-            .background(.quaternary)
-            .clipShape(RoundedRectangle(cornerRadius: 12))
+            .navigationTitle("Confirm app")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Back") { showingAppConfirm = false }
+                }
+            }
         }
     }
 
-    private var resolvedEntry: AppEntry? {
-        let query = appQuery.trimmingCharacters(in: .whitespaces)
-        guard !query.isEmpty else { return nil }
-        return AppDomainMap.all.first { $0.name.caseInsensitiveCompare(query) == .orderedSame }
-            ?? AppDomainMap.search(query).first
+    private var sortedApps: [AppEntry] {
+        AppDomainMap.all.sorted { $0.name.localizedCaseInsensitiveCompare($1.name) == .orderedAscending }
+    }
+
+    private func appIcon(for category: String) -> (String, Color) {
+        switch category {
+        case "Social":   return ("bubble.left.and.bubble.right.fill", .pink)
+        case "Video":    return ("popcorn.fill", .orange)
+        case "Music":    return ("music.note", .purple)
+        case "Shopping": return ("cart.fill", .green)
+        case "Gaming":   return ("gamecontroller.fill", .indigo)
+        case "News":     return ("newspaper.fill", .red)
+        case "Dating":   return ("heart.fill", .pink)
+        default:         return ("app.fill", .gray)
+        }
     }
 
     private var resolvedName: String {
-        let query = appQuery.trimmingCharacters(in: .whitespaces)
-        return resolvedEntry?.name ?? (query.isEmpty ? "this app" : query)
+        confirmedEntry?.name ?? "this app"
     }
 
     private var resolvedDomains: [String] {
-        resolvedEntry?.domains ?? []
+        confirmedEntry?.domains ?? []
     }
 
     // MARK: - Confirm modal sheet
