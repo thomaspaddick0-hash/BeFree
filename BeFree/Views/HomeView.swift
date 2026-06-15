@@ -1,4 +1,6 @@
 import SwiftUI
+import FamilyControls
+import ManagedSettings
 
 struct HomeView: View {
     @EnvironmentObject var blockManager: BlockManager
@@ -63,6 +65,41 @@ struct HomeView: View {
     }
 }
 
+// MARK: - Block App Title
+
+/// Renders the real app name (and icon) for a block by displaying Apple's stored
+/// ApplicationToken — the only way to surface a readable name, since the picker's
+/// tokens are opaque. Falls back to the block's stored label when no token is
+/// available (e.g. in the simulator, or category-only / domain-only blocks).
+struct BlockAppTitle: View {
+    let block: Block
+    var showsIcon: Bool = true
+
+    var body: some View {
+        let selection = decodedSelection
+        if let appTokens = selection?.applicationTokens, !appTokens.isEmpty {
+            if appTokens.count == 1, let token = appTokens.first {
+                if showsIcon {
+                    Label(token)
+                } else {
+                    Label(token).labelStyle(.titleOnly)
+                }
+            } else {
+                Text("\(appTokens.count) apps")
+            }
+        } else if let categoryTokens = selection?.categoryTokens, !categoryTokens.isEmpty {
+            Text(categoryTokens.count == 1 ? "1 category" : "\(categoryTokens.count) categories")
+        } else {
+            Text(block.appName)
+        }
+    }
+
+    private var decodedSelection: FamilyActivitySelection? {
+        guard let data = block.activitySelectionData else { return nil }
+        return try? JSONDecoder().decode(FamilyActivitySelection.self, from: data)
+    }
+}
+
 // MARK: - Free From Card
 
 struct FreeFromCard: View {
@@ -78,7 +115,7 @@ struct FreeFromCard: View {
                     Text("You have been free from")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
-                    Text(block.appName)
+                    BlockAppTitle(block: block)
                         .font(.title.bold())
                 }
                 Spacer()

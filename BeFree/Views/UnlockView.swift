@@ -18,7 +18,7 @@ struct UnlockView: View {
                     Image(systemName: "lock.fill")
                         .font(.system(size: 48))
                         .foregroundStyle(.orange)
-                    Text(block.appName)
+                    BlockAppTitle(block: block)
                         .font(.title.weight(.bold))
                     Text("You've been clean for")
                         .foregroundStyle(.secondary)

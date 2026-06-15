@@ -9,7 +9,7 @@ struct BlockRowView: View {
     var body: some View {
         HStack {
             VStack(alignment: .leading, spacing: 4) {
-                Text(block.appName)
+                BlockAppTitle(block: block)
                     .font(.headline)
                 Text(Block.elapsedString(from: elapsed))
                     .font(.system(.subheadline, design: .monospaced))
