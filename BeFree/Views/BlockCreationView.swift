@@ -1,5 +1,8 @@
 import SwiftUI
 import FamilyControls
+#if targetEnvironment(macCatalyst)
+import AppKit
+#endif
 
 struct BlockCreationView: View {
     @EnvironmentObject var blockManager: BlockManager
@@ -147,7 +150,11 @@ struct BlockCreationView: View {
             }
             Button("Cancel", role: .cancel) { authError = nil }
         }, message: {
-            Text("BeFree needs Screen Time access to block apps. Tap 'Open Settings' to allow it.")
+            #if targetEnvironment(macCatalyst)
+            Text("Click 'Open Settings' to open System Settings. Go to Screen Time, find BeFree in the app list, and enable access.")
+            #else
+            Text("Tap 'Open Settings', then go to Screen Time → BeFree to grant access.")
+            #endif
         })
         .onAppear { searchFocused = true }
     }
@@ -372,15 +379,29 @@ struct BlockCreationView: View {
     #endif
 
     private func openScreenTimeSettings() {
-        // App-Prefs:SCREEN_TIME opens Screen Time directly on device.
-        // canOpenURL always returns false for this scheme without a plist declaration,
-        // so we attempt open() directly and fall back on failure.
+        #if targetEnvironment(macCatalyst)
+        // On Mac, use NSWorkspace to open System Settings.
+        // Try Ventura/Sonoma identifier first, then Monterey, then root.
+        let candidates = [
+            "x-apple.systempreferences:com.apple.Screen-Time-Settings.extension",
+            "x-apple.systempreferences:com.apple.preference.screentime",
+            "x-apple.systempreferences:"
+        ]
+        for string in candidates {
+            if let url = URL(string: string) {
+                NSWorkspace.shared.open(url)
+                return
+            }
+        }
+        #else
+        // On iOS, try App-Prefs:SCREEN_TIME directly; fall back to app settings.
         guard let screenTimeURL = URL(string: "App-Prefs:SCREEN_TIME") else { return }
         UIApplication.shared.open(screenTimeURL) { success in
             if !success, let fallback = URL(string: UIApplication.openSettingsURLString) {
                 UIApplication.shared.open(fallback)
             }
         }
+        #endif
     }
 
     private var isValidEmail: Bool {
