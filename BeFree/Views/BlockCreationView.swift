@@ -1,45 +1,45 @@
 import SwiftUI
 import FamilyControls
 
-/// Category groupings shown in the mockup-style picker list. These mirror Apple's
-/// FamilyActivityPicker top-level rows but are backed by our own curated app list,
-/// so our search bar can actually filter them (Apple's picker can't be filtered externally).
+/// Category groupings used as a visual stand-in for Apple's FamilyActivityPicker
+/// in the simulator (the real picker only renders on a physical device with
+/// Screen Time authorization). On device these rows are replaced by the live picker.
 private struct BlockCategory: Identifiable {
     let id = UUID()
     let title: String
     let systemImage: String
     let tint: Color
-    let categoryKey: String?   // nil == "All Apps & Categories"
 }
 
 private let blockCategories: [BlockCategory] = [
-    BlockCategory(title: "All Apps & Categories", systemImage: "square.stack.3d.up.fill", tint: .blue,   categoryKey: nil),
-    BlockCategory(title: "Social",                systemImage: "bubble.left.and.bubble.right.fill", tint: .pink, categoryKey: "Social"),
-    BlockCategory(title: "Games",                 systemImage: "gamecontroller.fill",     tint: .indigo, categoryKey: "Gaming"),
-    BlockCategory(title: "Entertainment",         systemImage: "popcorn.fill",            tint: .orange, categoryKey: "Video"),
-    BlockCategory(title: "Music",                 systemImage: "music.note",              tint: .purple, categoryKey: "Music"),
-    BlockCategory(title: "Shopping",              systemImage: "cart.fill",               tint: .green,  categoryKey: "Shopping"),
-    BlockCategory(title: "News",                  systemImage: "newspaper.fill",          tint: .red,    categoryKey: "News"),
-    BlockCategory(title: "Dating",                systemImage: "heart.fill",              tint: .pink,   categoryKey: "Dating"),
+    BlockCategory(title: "All Apps & Categories", systemImage: "square.stack.3d.up.fill",         tint: .blue),
+    BlockCategory(title: "Social",                systemImage: "bubble.left.and.bubble.right.fill", tint: .pink),
+    BlockCategory(title: "Games",                 systemImage: "gamecontroller.fill",             tint: .indigo),
+    BlockCategory(title: "Entertainment",         systemImage: "popcorn.fill",                    tint: .orange),
+    BlockCategory(title: "Music",                 systemImage: "music.note",                      tint: .purple),
+    BlockCategory(title: "Shopping",              systemImage: "cart.fill",                       tint: .green),
+    BlockCategory(title: "News",                  systemImage: "newspaper.fill",                  tint: .red),
+    BlockCategory(title: "Dating",                systemImage: "heart.fill",                      tint: .pink),
 ]
 
 struct BlockCreationView: View {
     @EnvironmentObject var blockManager: BlockManager
     @Environment(\.dismiss) private var dismiss
 
-    @State private var selectedApp: AppEntry?
-    @State private var step: Step = .search
+    @State private var step: Step = .choose
     @State private var familySelection = FamilyActivitySelection()
+    @State private var blockName = ""
     @State private var authError: String?
 
-    enum Step { case search, picker, email }
+    @State private var mockSelection: BlockCategory?   // simulator-only stand-in selection
+
+    enum Step { case choose, email }
 
     var body: some View {
         NavigationStack {
             Group {
                 switch step {
-                case .search: searchStep
-                case .picker: pickerStep
+                case .choose: chooseStep
                 case .email:  emailStep
                 }
             }
@@ -47,41 +47,22 @@ struct BlockCreationView: View {
         }
     }
 
-    // MARK: - Step 1: Choose App
+    // MARK: - Step 1: Choose app (styled header + inline Apple picker)
 
-    @State private var query = ""
-    @State private var selectedCategory: BlockCategory?
-    @FocusState private var searchFocused: Bool
-
-    private var searchStep: some View {
+    private var chooseStep: some View {
         VStack(spacing: 0) {
             header
 
-            searchBar
+            Text("Use the search bar below to find the app you want to block.")
+                .font(.footnote)
+                .foregroundStyle(.secondary)
+                .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(.horizontal, 24)
-                .padding(.top, 2)
+                .padding(.bottom, 4)
 
-            ScrollView {
-                VStack(spacing: 0) {
-                    if !query.isEmpty {
-                        let results = AppDomainMap.search(query)
-                        if results.isEmpty {
-                            noResults
-                        } else {
-                            appCard(results)
-                        }
-                    } else if let category = selectedCategory {
-                        backRow(category)
-                        appCard(apps(in: category))
-                    } else {
-                        categoryCard
-                    }
-                }
-                .padding(.horizontal, 24)
-                .padding(.top, 18)
-                .padding(.bottom, 28)
-            }
-            .scrollDismissesKeyboard(.never)
+            pickerArea
+
+            continueBar
         }
         .background(Color(.systemGroupedBackground))
         .navigationTitle("")
@@ -104,7 +85,7 @@ struct BlockCreationView: View {
                 Text("Tap 'Open Settings', then go to Screen Time → BeFree to grant access.")
             }
         })
-        .onAppear { searchFocused = true }
+        .onAppear { requestAuthIfNeeded() }
     }
 
     // MARK: Header
@@ -121,53 +102,42 @@ struct BlockCreationView: View {
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 24)
         .padding(.top, 12)
-        .padding(.bottom, 18)
+        .padding(.bottom, 16)
     }
 
-    // MARK: Search bar (styled to match mockup)
+    // MARK: Picker area — real picker on device, styled stand-in in the simulator
 
-    private var searchBar: some View {
-        HStack(spacing: 12) {
-            Image(systemName: "magnifyingglass")
-                .font(.system(size: 18, weight: .semibold))
-                .foregroundStyle(.green)
-            TextField("Search apps...", text: $query)
-                .font(.body)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-                .focused($searchFocused)
-                .onChange(of: query) { newValue in
-                    if !newValue.isEmpty { selectedCategory = nil }
-                }
-            if !query.isEmpty {
-                Button { query = "" } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .foregroundStyle(.secondary)
-                }
+    @ViewBuilder
+    private var pickerArea: some View {
+        #if targetEnvironment(simulator)
+        ScrollView {
+            VStack(spacing: 8) {
+                mockPicker
+                Text("Simulator preview — Apple's real app picker appears here on a physical device.")
+                    .font(.caption2)
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 4)
             }
+            .padding(.horizontal, 24)
+            .padding(.top, 8)
+            .padding(.bottom, 16)
         }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 15)
-        .background(
-            RoundedRectangle(cornerRadius: 14)
-                .fill(Color(.systemGray6))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 14)
-                .stroke(Color.green, lineWidth: 1.5)
-        )
+        #else
+        FamilyActivityPicker(selection: $familySelection)
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .padding(.top, 8)
+        #endif
     }
 
-    // MARK: Category list (mockup-style card)
-
-    private var categoryCard: some View {
+    private var mockPicker: some View {
         VStack(spacing: 0) {
             ForEach(Array(blockCategories.enumerated()), id: \.element.id) { index, category in
                 Button {
-                    searchFocused = false
-                    selectedCategory = category
+                    mockSelection = category
+                    if blockName.isEmpty { blockName = category.title }
                 } label: {
-                    categoryRow(category)
+                    mockRow(category)
                 }
                 .buttonStyle(.plain)
 
@@ -179,92 +149,25 @@ struct BlockCreationView: View {
         .cardBackground()
     }
 
-    private func categoryRow(_ category: BlockCategory) -> some View {
-        HStack(spacing: 14) {
-            Image(systemName: "circle")
+    private func mockRow(_ category: BlockCategory) -> some View {
+        let isSelected = mockSelection?.id == category.id
+        return HStack(spacing: 14) {
+            Image(systemName: isSelected ? "checkmark.circle.fill" : "circle")
                 .font(.system(size: 22))
-                .foregroundStyle(Color(.systemGray3))
+                .foregroundStyle(isSelected ? Color.green : Color(.systemGray3))
             iconTile(category.systemImage, tint: category.tint)
             Text(category.title)
                 .font(.body)
                 .foregroundStyle(.primary)
-            Spacer()
-            if category.categoryKey != nil {
-                Image(systemName: "chevron.right")
-                    .font(.footnote.weight(.semibold))
-                    .foregroundStyle(Color(.systemGray3))
-            }
-        }
-        .padding(.horizontal, 16)
-        .padding(.vertical, 14)
-        .contentShape(Rectangle())
-    }
-
-    // MARK: App results (mockup-style card)
-
-    private func appCard(_ apps: [AppEntry]) -> some View {
-        VStack(spacing: 0) {
-            ForEach(Array(apps.enumerated()), id: \.element.id) { index, app in
-                Button { selectApp(app) } label: {
-                    appRow(app)
-                }
-                .buttonStyle(.plain)
-
-                if index < apps.count - 1 {
-                    Divider().padding(.leading, 62)
-                }
-            }
-        }
-        .cardBackground()
-    }
-
-    private func appRow(_ app: AppEntry) -> some View {
-        HStack(spacing: 14) {
-            iconTile(iconFor(app), tint: tintFor(app))
-            VStack(alignment: .leading, spacing: 2) {
-                Text(app.name)
-                    .font(.body.weight(.medium))
-                    .foregroundStyle(.primary)
-                Text(app.domains.prefix(2).joined(separator: ", "))
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            }
             Spacer()
             Image(systemName: "chevron.right")
                 .font(.footnote.weight(.semibold))
                 .foregroundStyle(Color(.systemGray3))
         }
         .padding(.horizontal, 16)
-        .padding(.vertical, 12)
+        .padding(.vertical, 14)
         .contentShape(Rectangle())
     }
-
-    private func backRow(_ category: BlockCategory) -> some View {
-        Button { selectedCategory = nil } label: {
-            HStack(spacing: 6) {
-                Image(systemName: "chevron.left").font(.footnote.weight(.bold))
-                Text(category.title).font(.subheadline.weight(.semibold))
-                Spacer()
-            }
-            .foregroundStyle(.green)
-            .padding(.bottom, 12)
-        }
-        .buttonStyle(.plain)
-    }
-
-    private var noResults: some View {
-        VStack(spacing: 10) {
-            Image(systemName: "questionmark.circle")
-                .font(.system(size: 48))
-                .foregroundStyle(Color(.systemGray4))
-            Text("No results for \"\(query)\"")
-                .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.top, 60)
-    }
-
-    // MARK: Picker-list helpers
 
     private func iconTile(_ systemImage: String, tint: Color) -> some View {
         Image(systemName: systemImage)
@@ -274,94 +177,39 @@ struct BlockCreationView: View {
             .background(RoundedRectangle(cornerRadius: 8).fill(tint.gradient))
     }
 
-    private func apps(in category: BlockCategory) -> [AppEntry] {
-        guard let key = category.categoryKey else { return AppDomainMap.all }
-        return AppDomainMap.all.filter { $0.category == key }
-    }
+    // MARK: Continue bar
 
-    private func tintFor(_ app: AppEntry) -> Color {
-        blockCategories.first { $0.categoryKey == app.category }?.tint ?? .green
-    }
-
-    private func iconFor(_ app: AppEntry) -> String {
-        blockCategories.first { $0.categoryKey == app.category }?.systemImage ?? "app.fill"
-    }
-
-    private func selectApp(_ app: AppEntry) {
-        selectedApp = app
-        familySelection = FamilyActivitySelection()
-        searchFocused = false
-        #if targetEnvironment(simulator)
-        step = .email
-        #else
-        if ProcessInfo.processInfo.isiOSAppOnMac {
-            step = .email
-        } else {
-            Task { await requestAuthAndAdvance() }
-        }
-        #endif
-    }
-
-    // MARK: - Step 2: Apple Picker
-
-    private var pickerStep: some View {
-        #if targetEnvironment(simulator)
-        EmptyView()
-        #else
+    private var continueBar: some View {
         VStack(spacing: 0) {
-            VStack(spacing: 8) {
-                Text("Select \(selectedApp?.name ?? "the app")")
-                    .font(.title2.bold())
-                    .multilineTextAlignment(.center)
-                    .padding(.top, 20)
-
-                if let category = selectedApp?.iosCategory {
-                    HStack(spacing: 6) {
-                        Image(systemName: "folder.fill")
-                            .foregroundStyle(.green)
-                        Text("Look under **\(category)**")
-                            .font(.subheadline)
-                    }
-                    .padding(.horizontal, 16)
-                    .padding(.vertical, 8)
-                    .background(.green.opacity(0.1))
-                    .clipShape(Capsule())
-                }
-
-                Text("Use the search icon inside the list, then tap Continue.")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
+            Divider()
+            Button {
+                step = .email
+            } label: {
+                Text("Continue")
+                    .font(.headline)
+                    .frame(maxWidth: .infinity)
+                    .frame(height: 54)
             }
-
-            FamilyActivityPicker(selection: $familySelection)
-                .frame(maxHeight: .infinity)
-
-            VStack(spacing: 12) {
-                Button { step = .email } label: {
-                    Text("Continue")
-                        .font(.headline)
-                        .frame(maxWidth: .infinity)
-                        .frame(height: 54)
-                }
-                .buttonStyle(.borderedProminent)
-                .tint(.green)
-                .disabled(familySelection.applicationTokens.isEmpty)
-                .padding(.horizontal)
-
-                Button("Go back") { step = .search }
-                    .foregroundStyle(.secondary)
-            }
-            .padding(.vertical, 16)
+            .buttonStyle(.borderedProminent)
+            .tint(.green)
+            .disabled(!hasSelection)
+            .padding(.horizontal, 24)
+            .padding(.top, 14)
+            .padding(.bottom, 8)
         }
-        .navigationTitle("")
-        .navigationBarTitleDisplayMode(.inline)
+        .background(.bar)
+    }
+
+    private var hasSelection: Bool {
+        #if targetEnvironment(simulator)
+        return mockSelection != nil
+        #else
+        return !familySelection.applicationTokens.isEmpty
+            || !familySelection.categoryTokens.isEmpty
         #endif
     }
 
-    // MARK: - Step 3: Friend's Email + Confirm modal
+    // MARK: - Step 2: Friend's Email + Confirm modal
 
     @State private var friendEmail = ""
     @State private var showingConfirm = false
@@ -382,20 +230,28 @@ struct BlockCreationView: View {
                         .font(.largeTitle.bold())
                         .multilineTextAlignment(.center)
 
-                    Text("Enter a trusted friend's email. They'll receive the 4-digit code that unlocks \(selectedApp?.name ?? "the app").")
+                    Text("Name the block, then enter a trusted friend's email. They'll receive the 4-digit code that unlocks it.")
                         .multilineTextAlignment(.center)
                         .foregroundStyle(.secondary)
                         .padding(.horizontal)
                 }
 
-                TextField("friend@example.com", text: $friendEmail)
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.emailAddress)
-                    .autocorrectionDisabled()
-                    .padding(16)
-                    .background(.quaternary)
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .padding(.horizontal)
+                VStack(spacing: 12) {
+                    TextField("Name this block (e.g. Instagram)", text: $blockName)
+                        .autocorrectionDisabled()
+                        .padding(16)
+                        .background(.quaternary)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+
+                    TextField("friend@example.com", text: $friendEmail)
+                        .textInputAutocapitalization(.never)
+                        .keyboardType(.emailAddress)
+                        .autocorrectionDisabled()
+                        .padding(16)
+                        .background(.quaternary)
+                        .clipShape(RoundedRectangle(cornerRadius: 14))
+                }
+                .padding(.horizontal)
             }
 
             Spacer()
@@ -411,17 +267,11 @@ struct BlockCreationView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(.green)
-                .disabled(!isValidEmail)
+                .disabled(!isValidEmail || blockName.trimmingCharacters(in: .whitespaces).isEmpty)
                 .padding(.horizontal)
 
-                Button("Go back") {
-                    #if targetEnvironment(simulator)
-                    step = .search
-                    #else
-                    step = .picker
-                    #endif
-                }
-                .foregroundStyle(.secondary)
+                Button("Go back") { step = .choose }
+                    .foregroundStyle(.secondary)
             }
             .padding(.bottom, 32)
         }
@@ -450,11 +300,11 @@ struct BlockCreationView: View {
                     .font(.system(size: 52))
                     .foregroundStyle(.green)
 
-                Text("Block \(selectedApp?.name ?? "")?")
+                Text("Block \(displayName)?")
                     .font(.title2.bold())
                     .multilineTextAlignment(.center)
 
-                Text("\(friendEmail) will receive the unlock code.\nYou won't be able to access \(selectedApp?.name ?? "the app") until they share it.")
+                Text("\(friendEmail) will receive the unlock code.\nYou won't be able to access \(displayName) until they share it.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
                     .multilineTextAlignment(.center)
@@ -501,25 +351,32 @@ struct BlockCreationView: View {
 
     // MARK: - Helpers
 
-    #if !targetEnvironment(simulator)
-    private func requestAuthAndAdvance() async {
-        switch AuthorizationCenter.shared.authorizationStatus {
-        case .approved, .approvedWithDataAccess:
-            step = .picker
-        case .notDetermined:
-            do {
-                try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
-                step = .picker
-            } catch {
+    private var displayName: String {
+        let trimmed = blockName.trimmingCharacters(in: .whitespaces)
+        return trimmed.isEmpty ? "the app" : trimmed
+    }
+
+    private func requestAuthIfNeeded() {
+        #if !targetEnvironment(simulator)
+        guard !ProcessInfo.processInfo.isiOSAppOnMac else { return }
+        Task {
+            switch AuthorizationCenter.shared.authorizationStatus {
+            case .approved, .approvedWithDataAccess:
+                break
+            case .notDetermined:
+                do {
+                    try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
+                } catch {
+                    authError = "denied"
+                }
+            case .denied:
+                authError = "denied"
+            @unknown default:
                 authError = "denied"
             }
-        case .denied:
-            authError = "denied"
-        @unknown default:
-            authError = "denied"
         }
+        #endif
     }
-    #endif
 
     private func openScreenTimeSettings() {
         if ProcessInfo.processInfo.isiOSAppOnMac {
@@ -556,22 +413,25 @@ struct BlockCreationView: View {
     }
 
     private func submit() async {
-        guard let app = selectedApp else { return }
+        let name = blockName.trimmingCharacters(in: .whitespaces)
+        // Recover known web domains for the typed name so the web filter can back up
+        // the native-app shield (empty for apps we don't recognise — that's fine).
+        let domains = AppDomainMap.domains(for: name)
         isSubmitting = true
         errorMessage = nil
         do {
             #if targetEnvironment(simulator)
             try await blockManager.addBlock(
-                appName: app.name,
-                domains: app.domains,
+                appName: name,
+                domains: domains,
                 friendEmail: friendEmail.trimmingCharacters(in: .whitespaces),
                 userName: ""
             )
             #else
             try await blockManager.addBlock(
-                appName: app.name,
+                appName: name,
                 selection: familySelection.applicationTokens.isEmpty ? nil : familySelection,
-                domains: app.domains,
+                domains: domains,
                 friendEmail: friendEmail.trimmingCharacters(in: .whitespaces),
                 userName: ""
             )
@@ -586,7 +446,7 @@ struct BlockCreationView: View {
 }
 
 private extension View {
-    /// White rounded card with a hairline border and soft shadow, matching the mockup's list panel.
+    /// White rounded card with a hairline border and soft shadow, matching the list panel.
     func cardBackground() -> some View {
         self
             .background(
