@@ -1,6 +1,28 @@
 import SwiftUI
 import FamilyControls
 
+/// Category groupings shown in the mockup-style picker list. These mirror Apple's
+/// FamilyActivityPicker top-level rows but are backed by our own curated app list,
+/// so our search bar can actually filter them (Apple's picker can't be filtered externally).
+private struct BlockCategory: Identifiable {
+    let id = UUID()
+    let title: String
+    let systemImage: String
+    let tint: Color
+    let categoryKey: String?   // nil == "All Apps & Categories"
+}
+
+private let blockCategories: [BlockCategory] = [
+    BlockCategory(title: "All Apps & Categories", systemImage: "square.stack.3d.up.fill", tint: .blue,   categoryKey: nil),
+    BlockCategory(title: "Social",                systemImage: "bubble.left.and.bubble.right.fill", tint: .pink, categoryKey: "Social"),
+    BlockCategory(title: "Games",                 systemImage: "gamecontroller.fill",     tint: .indigo, categoryKey: "Gaming"),
+    BlockCategory(title: "Entertainment",         systemImage: "popcorn.fill",            tint: .orange, categoryKey: "Video"),
+    BlockCategory(title: "Music",                 systemImage: "music.note",              tint: .purple, categoryKey: "Music"),
+    BlockCategory(title: "Shopping",              systemImage: "cart.fill",               tint: .green,  categoryKey: "Shopping"),
+    BlockCategory(title: "News",                  systemImage: "newspaper.fill",          tint: .red,    categoryKey: "News"),
+    BlockCategory(title: "Dating",                systemImage: "heart.fill",              tint: .pink,   categoryKey: "Dating"),
+]
+
 struct BlockCreationView: View {
     @EnvironmentObject var blockManager: BlockManager
     @Environment(\.dismiss) private var dismiss
@@ -28,115 +50,40 @@ struct BlockCreationView: View {
     // MARK: - Step 1: Choose App
 
     @State private var query = ""
+    @State private var selectedCategory: BlockCategory?
     @FocusState private var searchFocused: Bool
 
     private var searchStep: some View {
         VStack(spacing: 0) {
-            // Header
-            VStack(alignment: .leading, spacing: 6) {
-                Text("Choose an app")
-                    .font(.largeTitle.bold())
-                Text("to block")
-                    .font(.largeTitle.bold())
-                    .foregroundStyle(.green)
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.horizontal, 24)
-            .padding(.top, 28)
-            .padding(.bottom, 20)
+            header
 
-            // Prominent search bar
-            HStack(spacing: 12) {
-                Image(systemName: "magnifyingglass")
-                    .font(.title3)
-                    .foregroundStyle(searchFocused || !query.isEmpty ? .green : .secondary)
-                TextField("Search apps…", text: $query)
-                    .font(.body)
-                    .autocorrectionDisabled()
-                    .textInputAutocapitalization(.never)
-                    .focused($searchFocused)
-                if !query.isEmpty {
-                    Button { query = "" } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-            .padding(.horizontal, 18)
-            .padding(.vertical, 16)
-            .background(
-                RoundedRectangle(cornerRadius: 16)
-                    .fill(.quaternary)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 16)
-                            .stroke(searchFocused ? Color.green.opacity(0.5) : Color.clear, lineWidth: 2)
-                    )
-            )
-            .padding(.horizontal, 24)
-            .onTapGesture { searchFocused = true }
+            searchBar
+                .padding(.horizontal, 24)
+                .padding(.top, 2)
 
-            // Results / placeholder
-            if query.isEmpty {
-                Spacer()
-                VStack(spacing: 10) {
-                    Image(systemName: "iphone.and.arrow.forward")
-                        .font(.system(size: 52))
-                        .foregroundStyle(.green.opacity(0.25))
-                    Text("Type to find the app\nyou want to quit")
-                        .font(.subheadline)
-                        .foregroundStyle(.tertiary)
-                        .multilineTextAlignment(.center)
-                }
-                Spacer()
-            } else {
-                let results = AppDomainMap.search(query)
-                if results.isEmpty {
-                    Spacer()
-                    VStack(spacing: 10) {
-                        Image(systemName: "questionmark.circle")
-                            .font(.system(size: 52))
-                            .foregroundStyle(.quaternary)
-                        Text("No results for \"\(query)\"")
-                            .foregroundStyle(.secondary)
-                    }
-                    Spacer()
-                } else {
-                    List(results) { app in
-                        Button {
-                            selectedApp = app
-                            familySelection = FamilyActivitySelection()
-                            searchFocused = false
-                            #if targetEnvironment(simulator)
-                            step = .email
-                            #else
-                            if ProcessInfo.processInfo.isiOSAppOnMac {
-                                step = .email
-                            } else {
-                                Task { await requestAuthAndAdvance() }
-                            }
-                            #endif
-                        } label: {
-                            HStack(spacing: 12) {
-                                VStack(alignment: .leading, spacing: 3) {
-                                    Text(app.name)
-                                        .font(.headline)
-                                        .foregroundStyle(.primary)
-                                    Text(app.domains.prefix(2).joined(separator: ", "))
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                }
-                                Spacer()
-                                Image(systemName: "chevron.right")
-                                    .font(.caption.weight(.semibold))
-                                    .foregroundStyle(.tertiary)
-                            }
-                            .padding(.vertical, 6)
+            ScrollView {
+                VStack(spacing: 0) {
+                    if !query.isEmpty {
+                        let results = AppDomainMap.search(query)
+                        if results.isEmpty {
+                            noResults
+                        } else {
+                            appCard(results)
                         }
+                    } else if let category = selectedCategory {
+                        backRow(category)
+                        appCard(apps(in: category))
+                    } else {
+                        categoryCard
                     }
-                    .listStyle(.plain)
                 }
+                .padding(.horizontal, 24)
+                .padding(.top, 18)
+                .padding(.bottom, 28)
             }
+            .scrollDismissesKeyboard(.never)
         }
+        .background(Color(.systemGroupedBackground))
         .navigationTitle("")
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
@@ -158,6 +105,201 @@ struct BlockCreationView: View {
             }
         })
         .onAppear { searchFocused = true }
+    }
+
+    // MARK: Header
+
+    private var header: some View {
+        VStack(alignment: .leading, spacing: 0) {
+            Text("Choose an app")
+                .font(.largeTitle.bold())
+                .foregroundStyle(.primary)
+            Text("to block")
+                .font(.largeTitle.bold())
+                .foregroundStyle(.green)
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(.horizontal, 24)
+        .padding(.top, 12)
+        .padding(.bottom, 18)
+    }
+
+    // MARK: Search bar (styled to match mockup)
+
+    private var searchBar: some View {
+        HStack(spacing: 12) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 18, weight: .semibold))
+                .foregroundStyle(.green)
+            TextField("Search apps...", text: $query)
+                .font(.body)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .focused($searchFocused)
+                .onChange(of: query) { newValue in
+                    if !newValue.isEmpty { selectedCategory = nil }
+                }
+            if !query.isEmpty {
+                Button { query = "" } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .foregroundStyle(.secondary)
+                }
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 15)
+        .background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(Color(.systemGray6))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 14)
+                .stroke(Color.green, lineWidth: 1.5)
+        )
+    }
+
+    // MARK: Category list (mockup-style card)
+
+    private var categoryCard: some View {
+        VStack(spacing: 0) {
+            ForEach(Array(blockCategories.enumerated()), id: \.element.id) { index, category in
+                Button {
+                    searchFocused = false
+                    selectedCategory = category
+                } label: {
+                    categoryRow(category)
+                }
+                .buttonStyle(.plain)
+
+                if index < blockCategories.count - 1 {
+                    Divider().padding(.leading, 64)
+                }
+            }
+        }
+        .cardBackground()
+    }
+
+    private func categoryRow(_ category: BlockCategory) -> some View {
+        HStack(spacing: 14) {
+            Image(systemName: "circle")
+                .font(.system(size: 22))
+                .foregroundStyle(Color(.systemGray3))
+            iconTile(category.systemImage, tint: category.tint)
+            Text(category.title)
+                .font(.body)
+                .foregroundStyle(.primary)
+            Spacer()
+            if category.categoryKey != nil {
+                Image(systemName: "chevron.right")
+                    .font(.footnote.weight(.semibold))
+                    .foregroundStyle(Color(.systemGray3))
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 14)
+        .contentShape(Rectangle())
+    }
+
+    // MARK: App results (mockup-style card)
+
+    private func appCard(_ apps: [AppEntry]) -> some View {
+        VStack(spacing: 0) {
+            ForEach(Array(apps.enumerated()), id: \.element.id) { index, app in
+                Button { selectApp(app) } label: {
+                    appRow(app)
+                }
+                .buttonStyle(.plain)
+
+                if index < apps.count - 1 {
+                    Divider().padding(.leading, 62)
+                }
+            }
+        }
+        .cardBackground()
+    }
+
+    private func appRow(_ app: AppEntry) -> some View {
+        HStack(spacing: 14) {
+            iconTile(iconFor(app), tint: tintFor(app))
+            VStack(alignment: .leading, spacing: 2) {
+                Text(app.name)
+                    .font(.body.weight(.medium))
+                    .foregroundStyle(.primary)
+                Text(app.domains.prefix(2).joined(separator: ", "))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
+            Spacer()
+            Image(systemName: "chevron.right")
+                .font(.footnote.weight(.semibold))
+                .foregroundStyle(Color(.systemGray3))
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
+        .contentShape(Rectangle())
+    }
+
+    private func backRow(_ category: BlockCategory) -> some View {
+        Button { selectedCategory = nil } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "chevron.left").font(.footnote.weight(.bold))
+                Text(category.title).font(.subheadline.weight(.semibold))
+                Spacer()
+            }
+            .foregroundStyle(.green)
+            .padding(.bottom, 12)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var noResults: some View {
+        VStack(spacing: 10) {
+            Image(systemName: "questionmark.circle")
+                .font(.system(size: 48))
+                .foregroundStyle(Color(.systemGray4))
+            Text("No results for \"\(query)\"")
+                .foregroundStyle(.secondary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(.top, 60)
+    }
+
+    // MARK: Picker-list helpers
+
+    private func iconTile(_ systemImage: String, tint: Color) -> some View {
+        Image(systemName: systemImage)
+            .font(.system(size: 15, weight: .semibold))
+            .foregroundStyle(.white)
+            .frame(width: 30, height: 30)
+            .background(RoundedRectangle(cornerRadius: 8).fill(tint.gradient))
+    }
+
+    private func apps(in category: BlockCategory) -> [AppEntry] {
+        guard let key = category.categoryKey else { return AppDomainMap.all }
+        return AppDomainMap.all.filter { $0.category == key }
+    }
+
+    private func tintFor(_ app: AppEntry) -> Color {
+        blockCategories.first { $0.categoryKey == app.category }?.tint ?? .green
+    }
+
+    private func iconFor(_ app: AppEntry) -> String {
+        blockCategories.first { $0.categoryKey == app.category }?.systemImage ?? "app.fill"
+    }
+
+    private func selectApp(_ app: AppEntry) {
+        selectedApp = app
+        familySelection = FamilyActivitySelection()
+        searchFocused = false
+        #if targetEnvironment(simulator)
+        step = .email
+        #else
+        if ProcessInfo.processInfo.isiOSAppOnMac {
+            step = .email
+        } else {
+            Task { await requestAuthAndAdvance() }
+        }
+        #endif
     }
 
     // MARK: - Step 2: Apple Picker
@@ -440,6 +582,23 @@ struct BlockCreationView: View {
             errorMessage = error.localizedDescription
         }
         isSubmitting = false
+    }
+}
+
+private extension View {
+    /// White rounded card with a hairline border and soft shadow, matching the mockup's list panel.
+    func cardBackground() -> some View {
+        self
+            .background(
+                RoundedRectangle(cornerRadius: 18)
+                    .fill(Color(.systemBackground))
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 18))
+            .overlay(
+                RoundedRectangle(cornerRadius: 18)
+                    .stroke(Color(.systemGray5), lineWidth: 1)
+            )
+            .shadow(color: .black.opacity(0.04), radius: 6, y: 2)
     }
 }
 
