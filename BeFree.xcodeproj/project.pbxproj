@@ -18,10 +18,10 @@
 		7F99735C5196E0850C7388E9 /* BeFreeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E980152227A523FCF1DFCC /* BeFreeApp.swift */; };
 		90B14F8031AADD626271D74B /* AppDomainMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7478341859E657553E784F3E /* AppDomainMap.swift */; };
 		9209D63BF59E4516F43E8E5A /* ShieldActionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B515822382A841DC3F47AE94 /* ShieldActionExtension.swift */; };
-		A9963E24EB98E75B5E93509E /* AddBlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFAF41E6AF75B74B73E497DA /* AddBlockView.swift */; };
 		AF101358C6179F7F53867B29 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E4548E28B693FA3D655D0B3 /* Assets.xcassets */; };
 		BCD230850122EDD4D0DE3319 /* BeFreeMonitor.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C63E39A6AA25147D970D44D4 /* BeFreeMonitor.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		BD7D172B03D5C15E05738205 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D346BAC44B6597BC19C253AB /* ContentView.swift */; };
+		C8E747D32FE03C7D00FBB663 /* BlockCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C8E747D22FE03C7D00FBB663 /* BlockCreationView.swift */; };
 		D92321F94E220C8FB359DE3D /* UnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2F073DFD953DD7639071EEE /* UnlockView.swift */; };
 		DD0AD3262928024CAA5FF34C /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 299D7B50D986650A9A850AF3 /* Secrets.swift */; };
 		DD5BA0E5AB541D0188891A38 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52EE7061F893CF0A4E39A99D /* SupabaseService.swift */; };
@@ -75,9 +75,9 @@
 		968206643C4A9592AC9CED44 /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
 		A7E980152227A523FCF1DFCC /* BeFreeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeFreeApp.swift; sourceTree = "<group>"; };
 		A8D7F5119967DB1805290710 /* BlockRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockRowView.swift; sourceTree = "<group>"; };
-		AFAF41E6AF75B74B73E497DA /* AddBlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddBlockView.swift; sourceTree = "<group>"; };
 		B515822382A841DC3F47AE94 /* ShieldActionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldActionExtension.swift; sourceTree = "<group>"; };
 		C63E39A6AA25147D970D44D4 /* BeFreeMonitor.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BeFreeMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C8E747D22FE03C7D00FBB663 /* BlockCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockCreationView.swift; sourceTree = "<group>"; };
 		D2F073DFD953DD7639071EEE /* UnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockView.swift; sourceTree = "<group>"; };
 		D346BAC44B6597BC19C253AB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		E70B5806AB1D33131D9D216A /* BeFreeShield.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BeFreeShield.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -140,7 +140,7 @@
 		C492535191477625B7270826 /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				AFAF41E6AF75B74B73E497DA /* AddBlockView.swift */,
+				C8E747D22FE03C7D00FBB663 /* BlockCreationView.swift */,
 				A8D7F5119967DB1805290710 /* BlockRowView.swift */,
 				8FCEFAA98137AA9B6F8AD1B2 /* HomeView.swift */,
 				EE14812653A74796340A561B /* OnboardingView.swift */,
@@ -287,7 +287,6 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				A9963E24EB98E75B5E93509E /* AddBlockView.swift in Sources */,
 				90B14F8031AADD626271D74B /* AppDomainMap.swift in Sources */,
 				7F99735C5196E0850C7388E9 /* BeFreeApp.swift in Sources */,
 				423D9A9310C8F0B575C83566 /* Block.swift in Sources */,
@@ -296,6 +295,7 @@
 				BD7D172B03D5C15E05738205 /* ContentView.swift in Sources */,
 				2A0F805CEAE1AB67A114D9D6 /* HomeView.swift in Sources */,
 				220C13A62685F20B3613694A /* OnboardingView.swift in Sources */,
+				C8E747D32FE03C7D00FBB663 /* BlockCreationView.swift in Sources */,
 				F127531F86C213F207EBA442 /* ResendService.swift in Sources */,
 				DD0AD3262928024CAA5FF34C /* Secrets.swift in Sources */,
 				DD5BA0E5AB541D0188891A38 /* SupabaseService.swift in Sources */,
