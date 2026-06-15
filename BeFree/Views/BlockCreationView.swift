@@ -143,13 +143,11 @@ struct BlockCreationView: View {
         .alert("Permission Required", isPresented: .constant(authError != nil), actions: {
             Button("Open Settings") {
                 authError = nil
-                if let url = URL(string: UIApplication.openSettingsURLString) {
-                    UIApplication.shared.open(url)
-                }
+                openScreenTimeSettings()
             }
             Button("Cancel", role: .cancel) { authError = nil }
         }, message: {
-            Text("Tap 'Open Settings', then go to Screen Time → BeFree to grant access.")
+            Text("BeFree needs Screen Time access to block apps. Tap 'Open Settings' to allow it.")
         })
         .onAppear { searchFocused = true }
     }
@@ -356,7 +354,7 @@ struct BlockCreationView: View {
     #if !targetEnvironment(simulator)
     private func requestAuthAndAdvance() async {
         switch AuthorizationCenter.shared.authorizationStatus {
-        case .approved:
+        case .approved, .approvedWithDataAccess:
             step = .picker
         case .notDetermined:
             do {
@@ -372,6 +370,21 @@ struct BlockCreationView: View {
         }
     }
     #endif
+
+    private func openScreenTimeSettings() {
+        // Try to open Screen Time settings directly; fall back to root Settings
+        let candidates = [
+            "App-Prefs:SCREEN_TIME",
+            "App-Prefs:root=SCREEN_TIME",
+            UIApplication.openSettingsURLString
+        ]
+        for string in candidates {
+            if let url = URL(string: string), UIApplication.shared.canOpenURL(url) {
+                UIApplication.shared.open(url)
+                return
+            }
+        }
+    }
 
     private var isValidEmail: Bool {
         let t = friendEmail.trimmingCharacters(in: .whitespaces)
