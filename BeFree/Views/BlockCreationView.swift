@@ -372,16 +372,13 @@ struct BlockCreationView: View {
     #endif
 
     private func openScreenTimeSettings() {
-        // Try to open Screen Time settings directly; fall back to root Settings
-        let candidates = [
-            "App-Prefs:SCREEN_TIME",
-            "App-Prefs:root=SCREEN_TIME",
-            UIApplication.openSettingsURLString
-        ]
-        for string in candidates {
-            if let url = URL(string: string), UIApplication.shared.canOpenURL(url) {
-                UIApplication.shared.open(url)
-                return
+        // App-Prefs:SCREEN_TIME opens Screen Time directly on device.
+        // canOpenURL always returns false for this scheme without a plist declaration,
+        // so we attempt open() directly and fall back on failure.
+        guard let screenTimeURL = URL(string: "App-Prefs:SCREEN_TIME") else { return }
+        UIApplication.shared.open(screenTimeURL) { success in
+            if !success, let fallback = URL(string: UIApplication.openSettingsURLString) {
+                UIApplication.shared.open(fallback)
             }
         }
     }
