@@ -141,9 +141,15 @@ struct BlockCreationView: View {
             }
         }
         .alert("Permission Required", isPresented: .constant(authError != nil), actions: {
-            Button("OK") { authError = nil }
+            Button("Open Settings") {
+                authError = nil
+                if let url = URL(string: UIApplication.openSettingsURLString) {
+                    UIApplication.shared.open(url)
+                }
+            }
+            Button("Cancel", role: .cancel) { authError = nil }
         }, message: {
-            Text(authError ?? "")
+            Text("Tap 'Open Settings', then go to Screen Time → BeFree to grant access.")
         })
         .onAppear { searchFocused = true }
     }
@@ -274,10 +280,16 @@ struct BlockCreationView: View {
         .navigationTitle("Friend's email")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $showingConfirm) {
-            confirmSheet
-                .presentationDetents([.fraction(0.52)])
-                .presentationCornerRadius(28)
-                .presentationDragIndicator(.visible)
+            if #available(iOS 16.4, *) {
+                confirmSheet
+                    .presentationDetents([.fraction(0.52)])
+                    .presentationCornerRadius(28)
+                    .presentationDragIndicator(.visible)
+            } else {
+                confirmSheet
+                    .presentationDetents([.fraction(0.52)])
+                    .presentationDragIndicator(.visible)
+            }
         }
     }
 
@@ -343,11 +355,20 @@ struct BlockCreationView: View {
 
     #if !targetEnvironment(simulator)
     private func requestAuthAndAdvance() async {
-        do {
-            try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
+        switch AuthorizationCenter.shared.authorizationStatus {
+        case .approved:
             step = .picker
-        } catch {
-            authError = "Screen Time permission is required to block apps. Go to Settings → Screen Time and enable it."
+        case .notDetermined:
+            do {
+                try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
+                step = .picker
+            } catch {
+                authError = "denied"
+            }
+        case .denied:
+            authError = "denied"
+        @unknown default:
+            authError = "denied"
         }
     }
     #endif
