@@ -34,6 +34,15 @@ final class BlockManager: ObservableObject {
         activeBlocks = blocks
     }
 
+    /// The shield's "Enter unlock code" button can't open us directly (no public
+    /// API), so it leaves a flag in the shared app group. Pick it up whenever the
+    /// app comes to the foreground and route to the unlock screen.
+    func checkPendingUnlockFlag() {
+        guard sharedDefaults.bool(forKey: "pendingUnlock") else { return }
+        sharedDefaults.set(false, forKey: "pendingUnlock")
+        pendingUnlockDeepLink = true
+    }
+
     // MARK: - Creation flow
 
     /// Reset any half-applied state when a new creation flow starts.

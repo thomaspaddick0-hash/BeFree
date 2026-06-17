@@ -19,7 +19,7 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
                 color: .label
             ),
             subtitle: ShieldConfiguration.Label(
-                text: elapsed.map { "Clean for \($0)" } ?? "Stay strong.",
+                text: elapsed.map { "You've been free for \($0). Keep it going." } ?? "Stay strong.",
                 color: .secondaryLabel
             ),
             primaryButtonLabel: ShieldConfiguration.Label(
@@ -57,6 +57,10 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
 
     // MARK: - Helpers
 
+    // The system renders the shield as a one-off static snapshot — there is no
+    // API to drive a live, ticking timer here. So we report elapsed time at
+    // minute resolution (a milestone) rather than seconds, which would otherwise
+    // look like a frozen stopwatch.
     private func elapsedString(for application: Application) -> String? {
         guard
             let data = sharedDefaults.data(forKey: "blockedAt"),
@@ -66,7 +70,8 @@ class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         let interval = Date().timeIntervalSince(date)
         let h = Int(interval) / 3600
         let m = (Int(interval) % 3600) / 60
-        let s = Int(interval) % 60
-        return h > 0 ? String(format: "%dh %02dm %02ds", h, m, s) : String(format: "%02dm %02ds", m, s)
+        if h > 0 { return "\(h)h \(m)m" }
+        if m > 0 { return "\(m) min" }
+        return "under a minute"
     }
 }

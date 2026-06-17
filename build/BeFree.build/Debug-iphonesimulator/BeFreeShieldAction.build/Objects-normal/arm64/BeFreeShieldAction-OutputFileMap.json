@@ -1,0 +1,19 @@
+{
+  "" : {
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/BeFreeShieldAction-primary.dia",
+    "emit-module-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/BeFreeShieldAction-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/BeFreeShieldAction-primary-emit-module.dia",
+    "pch" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/BeFreeShieldAction-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/BeFreeShieldAction-primary.swiftdeps"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFreeShieldAction/ShieldActionExtension.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/ShieldActionExtension.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/ShieldActionExtension.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/ShieldActionExtension.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/ShieldActionExtension.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/ShieldActionExtension.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/ShieldActionExtension.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/ShieldActionExtension.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShieldAction.build/Objects-normal/arm64/ShieldActionExtension~partial.swiftmodule"
+  }
+}

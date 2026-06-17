@@ -19,6 +19,26 @@ packages:
     url: https://github.com/supabase/supabase-swift
     from: "2.0.0"
 
+schemes:
+  BeFree:
+    build:
+      targets:
+        BeFree: all
+    run:
+      config: Debug
+    test:
+      config: Debug
+    archive:
+      config: Release
+  BeFreeShield:
+    build:
+      targets:
+        BeFreeShield: all
+  BeFreeMonitor:
+    build:
+      targets:
+        BeFreeMonitor: all
+
 targets:
   BeFree:
     type: application
@@ -69,6 +89,7 @@ targets:
       - package: Supabase
         product: Supabase
       - target: BeFreeShield
+      - target: BeFreeShieldAction
       - target: BeFreeMonitor
 
   BeFreeShield:
@@ -96,6 +117,32 @@ targets:
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.befree.app.shield
+
+  BeFreeShieldAction:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: BeFreeShieldAction
+        excludes:
+          - "Info.plist"
+          - "BeFreeShieldAction.entitlements"
+    info:
+      path: BeFreeShieldAction/Info.plist
+      properties:
+        CFBundleDisplayName: BeFreeShieldAction
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.ManagedSettings.shield-action-service
+          NSExtensionPrincipalClass: $(PRODUCT_MODULE_NAME).ShieldActionExtension
+    entitlements:
+      path: BeFreeShieldAction/BeFreeShieldAction.entitlements
+      properties:
+        com.apple.security.application-groups:
+          - group.com.befree.app
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.befree.app.shieldaction
 
   BeFreeMonitor:
     type: app-extension

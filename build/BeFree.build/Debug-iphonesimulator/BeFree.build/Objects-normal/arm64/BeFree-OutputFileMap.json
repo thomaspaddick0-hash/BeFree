@@ -1,0 +1,149 @@
+{
+  "" : {
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFree-primary.dia",
+    "emit-module-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFree-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFree-primary-emit-module.dia",
+    "pch" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFree-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFree-primary.swiftdeps"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/BeFreeApp.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFreeApp.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFreeApp.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFreeApp.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFreeApp.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFreeApp.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFreeApp.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFreeApp.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BeFreeApp~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/ContentView.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ContentView.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ContentView.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ContentView.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ContentView.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ContentView.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ContentView.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ContentView.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ContentView~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/Models/Block.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Block.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Block.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Block.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Block.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Block.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Block.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Block.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Block~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/Models/BlockManager.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockManager.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockManager.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockManager.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockManager.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockManager.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockManager.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockManager.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockManager~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/Secrets.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Secrets.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Secrets.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Secrets.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Secrets.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Secrets.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Secrets.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Secrets.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/Secrets~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/Services/AppDomainMap.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/AppDomainMap.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/AppDomainMap.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/AppDomainMap.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/AppDomainMap.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/AppDomainMap.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/AppDomainMap.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/AppDomainMap.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/AppDomainMap~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/Services/ResendService.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ResendService.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ResendService.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ResendService.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ResendService.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ResendService.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ResendService.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ResendService.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/ResendService~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/Services/SupabaseService.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/SupabaseService.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/SupabaseService.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/SupabaseService.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/SupabaseService.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/SupabaseService.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/SupabaseService.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/SupabaseService.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/SupabaseService~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/Views/BlockCreationView.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockCreationView.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockCreationView.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockCreationView.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockCreationView.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockCreationView.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockCreationView.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockCreationView.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockCreationView~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/Views/BlockRowView.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockRowView.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockRowView.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockRowView.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockRowView.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockRowView.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockRowView.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockRowView.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/BlockRowView~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/Views/HomeView.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/HomeView.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/HomeView.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/HomeView.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/HomeView.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/HomeView.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/HomeView.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/HomeView.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/HomeView~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/Views/OnboardingView.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/OnboardingView.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/OnboardingView.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/OnboardingView.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/OnboardingView.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/OnboardingView.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/OnboardingView.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/OnboardingView.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/OnboardingView~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFree/Views/UnlockView.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/UnlockView.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/UnlockView.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/UnlockView.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/UnlockView.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/UnlockView.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/UnlockView.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/UnlockView.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/UnlockView~partial.swiftmodule"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/DerivedSources/GeneratedAssetSymbols.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/GeneratedAssetSymbols.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/GeneratedAssetSymbols.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/GeneratedAssetSymbols.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/GeneratedAssetSymbols.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/GeneratedAssetSymbols.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFree.build/Objects-normal/arm64/GeneratedAssetSymbols~partial.swiftmodule"
+  }
+}

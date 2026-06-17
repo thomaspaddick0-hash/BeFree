@@ -1,0 +1,19 @@
+{
+  "" : {
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/BeFreeShield-primary.dia",
+    "emit-module-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/BeFreeShield-primary-emit-module.d",
+    "emit-module-diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/BeFreeShield-primary-emit-module.dia",
+    "pch" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/BeFreeShield-primary-Bridging-header.pch",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/BeFreeShield-primary.swiftdeps"
+  },
+  "/Users/thomaspaddick/ClaudeCodeTest/BeFree/BeFreeShield/ShieldConfigurationExtension.swift" : {
+    "const-values" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/ShieldConfigurationExtension.swiftconstvalues",
+    "dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/ShieldConfigurationExtension.d",
+    "diagnostics" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/ShieldConfigurationExtension.dia",
+    "index-unit-output-path" : "/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/ShieldConfigurationExtension.o",
+    "llvm-bc" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/ShieldConfigurationExtension.bc",
+    "object" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/ShieldConfigurationExtension.o",
+    "swift-dependencies" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/ShieldConfigurationExtension.swiftdeps",
+    "swiftmodule" : "/Users/thomaspaddick/ClaudeCodeTest/BeFree/build/BeFree.build/Debug-iphonesimulator/BeFreeShield.build/Objects-normal/x86_64/ShieldConfigurationExtension~partial.swiftmodule"
+  }
+}
