@@ -21,20 +21,59 @@ final class BlockManager: ObservableObject {
     private let resend = ResendService.shared
     private let sharedDefaults = UserDefaults(suiteName: "group.com.befree.app")!
 
+    // A block being assembled across the creation flow. Restrictions are applied
+    // to ManagedSettingsStore immediately (for instant effect) but the durable
+    // Supabase record + accountability email are only created on finalize. If the
+    // user backs out before finishing, `cancelPendingBlock()` rolls everything back.
+    private var pendingSelection: FamilyActivitySelection?
+    private var pendingDomains: [String] = []
+
     func loadBlocks() async {
         do { try await supabase.signInIfNeeded() } catch { return }
         guard let blocks = try? await supabase.fetchActiveBlocks() else { return }
         activeBlocks = blocks
     }
 
-    func addBlock(
-        appName: String,
-        selection: FamilyActivitySelection? = nil,
-        domains: [String],
-        friendEmail: String,
-        userName: String
-    ) async throws {
+    // MARK: - Creation flow
+
+    /// Reset any half-applied state when a new creation flow starts.
+    func beginPendingBlock() {
+        pendingSelection = nil
+        pendingDomains = []
+    }
+
+    /// Screen 2: shield the picked app immediately.
+    func applyPendingAppShield(_ selection: FamilyActivitySelection) {
+        pendingSelection = selection
+        #if !targetEnvironment(simulator)
+        rebuildShield()
+        #endif
+    }
+
+    /// Screen 3: filter the picked app's website immediately.
+    func applyPendingWebDomains(_ domains: [String]) {
+        pendingDomains = domains
+        #if !targetEnvironment(simulator)
+        rebuildWebFilter()
+        #endif
+    }
+
+    /// User abandoned the flow before finishing — undo anything applied.
+    func cancelPendingBlock() {
+        pendingSelection = nil
+        pendingDomains = []
+        #if !targetEnvironment(simulator)
+        rebuildShield()
+        rebuildWebFilter()
+        #endif
+    }
+
+    /// Screen 4: persist the block, email the friend, and keep restrictions in place.
+    func finalizePendingBlock(appName: String, friendEmail: String, userName: String) async throws {
         try await supabase.signInIfNeeded()
+
+        let selection = pendingSelection
+        let domains = pendingDomains
         let code = String(format: "%04d", Int.random(in: 0...9999))
         let now = Date()
         let selectionData = selection.flatMap { try? JSONEncoder().encode($0) }
@@ -52,34 +91,27 @@ final class BlockManager: ObservableObject {
         try await supabase.insertBlock(block, code: code, userID: userID)
         try await resend.sendCode(code, appName: appName, toEmail: friendEmail, userName: userName)
 
-        #if !targetEnvironment(simulator)
-        if let selection { applyRestrictions(selection: selection, domains: domains) }
-        else { applyDomainsOnly(domains: domains) }
-        #endif
-
         var stored = storedBlocks()
         stored[block.id.uuidString] = now
         sharedDefaults.set(try? JSONEncoder().encode(stored), forKey: "blockedAt")
 
         activeBlocks.append(block)
+        pendingSelection = nil
+        pendingDomains = []
         saveStoredSelections()
 
         #if !targetEnvironment(simulator)
+        rebuildShield()
+        rebuildWebFilter()
         startMonitoringIfNeeded()
         #endif
     }
 
+    // MARK: - Unlock
+
     func unlock(block: Block, code: String) async throws {
         try await supabase.signInIfNeeded()
         try await supabase.verifyAndUnlock(blockId: block.id, code: code)
-
-        #if !targetEnvironment(simulator)
-        if let data = block.activitySelectionData,
-           let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) {
-            store.shield.applications?.subtract(selection.applicationTokens)
-        }
-        rebuildWebFilter()
-        #endif
 
         var stored = storedBlocks()
         stored.removeValue(forKey: block.id.uuidString)
@@ -89,6 +121,8 @@ final class BlockManager: ObservableObject {
         saveStoredSelections()
 
         #if !targetEnvironment(simulator)
+        rebuildShield()
+        rebuildWebFilter()
         if activeBlocks.isEmpty {
             activityCenter.stopMonitoring([activityName])
         }
@@ -109,19 +143,25 @@ final class BlockManager: ObservableObject {
     }
 
     #if !targetEnvironment(simulator)
-    private func applyRestrictions(selection: FamilyActivitySelection, domains: [String]) {
-        var blocked = store.shield.applications ?? []
-        blocked.formUnion(selection.applicationTokens)
-        store.shield.applications = blocked
-        rebuildWebFilter()
-    }
-
-    private func applyDomainsOnly(domains: [String]) {
-        rebuildWebFilter()
+    /// Rebuild the app shield from every active block plus the pending one, so
+    /// rollback and unlock both reduce to "rebuild from current truth".
+    private func rebuildShield() {
+        var tokens = Set<ApplicationToken>()
+        for block in activeBlocks where block.isActive {
+            if let data = block.activitySelectionData,
+               let selection = try? JSONDecoder().decode(FamilyActivitySelection.self, from: data) {
+                tokens.formUnion(selection.applicationTokens)
+            }
+        }
+        if let pendingSelection {
+            tokens.formUnion(pendingSelection.applicationTokens)
+        }
+        store.shield.applications = tokens.isEmpty ? nil : tokens
     }
 
     private func rebuildWebFilter() {
-        let allDomains = activeBlocks.filter(\.isActive).flatMap(\.blockedDomains)
+        var allDomains = activeBlocks.filter(\.isActive).flatMap(\.blockedDomains)
+        allDomains.append(contentsOf: pendingDomains)
         store.webContent.blockedByFilter = allDomains.isEmpty
             ? nil
             : .specific(Set(allDomains.map { WebDomain(domain: $0) }))
