@@ -22,6 +22,7 @@ struct OnboardingView: View {
     @State private var password = ""
     @State private var confirmPassword = ""
     @State private var currentNonce: String?
+    @StateObject private var appleSignIn = AppleSignInCoordinator()
 
     private enum Screen {
         case splash, signUp, login
@@ -41,6 +42,19 @@ struct OnboardingView: View {
             }
         }
         .animation(.easeInOut(duration: 0.45), value: screen)
+        .onAppear { wireAppleSignIn() }
+    }
+
+    private func wireAppleSignIn() {
+        appleSignIn.onConfigure = { request in
+            let nonce = randomNonceString()
+            currentNonce = nonce
+            request.requestedScopes = [.fullName, .email]
+            request.nonce = sha256(nonce)
+        }
+        appleSignIn.onCompletion = { result in
+            Task { await handleAppleResult(result) }
+        }
     }
 
     // MARK: - Splash
@@ -256,19 +270,11 @@ struct OnboardingView: View {
     }
 
     private var appleIconButton: some View {
-        SignInWithAppleButton(.signIn) { request in
-            let nonce = randomNonceString()
-            currentNonce = nonce
-            request.requestedScopes = [.fullName, .email]
-            request.nonce = sha256(nonce)
-        } onCompletion: { result in
-            Task { await handleAppleResult(result) }
-        }
-        .signInWithAppleButtonStyle(.black)
-        .frame(width: 56, height: 56)
-        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .disabled(isBusy)
-        .opacity(isBusy ? 0.6 : 1)
+        AppleSignInIconButton(
+            coordinator: appleSignIn,
+            isLoading: isSigningInApple,
+            isDisabled: isBusy
+        )
     }
 
     private var googleLogo: some View {

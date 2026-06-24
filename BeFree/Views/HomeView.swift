@@ -47,7 +47,7 @@ struct HomeView: View {
                 } label: {
                     InitialsCircle(initials: auth.currentUserInitials, size: 30)
                         .overlay(alignment: .topTrailing) {
-                            if !blockManager.heldBlocks.isEmpty {
+                            if blockManager.unseenHeldCodesCount > 0 {
                                 Circle()
                                     .fill(.green)
                                     .frame(width: 9, height: 9)

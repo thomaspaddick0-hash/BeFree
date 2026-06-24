@@ -68,6 +68,7 @@ struct MenuDrawer: View {
         switch screen {
         case .menu:      menuRoot
         case .heldCodes: HeldCodesList()
+            .onAppear { blockManager.markHeldCodesAsSeen() }
         case .account:   AccountView()
         }
     }
@@ -81,7 +82,10 @@ struct MenuDrawer: View {
             VStack(spacing: 10) {
                 menuRow(icon: "key.fill", tint: .green,
                         title: "Codes I'm Holding",
-                        badge: blockManager.heldBlocks.count) { goTo(.heldCodes) }
+                        badge: blockManager.unseenHeldCodesCount) {
+                    blockManager.markHeldCodesAsSeen()
+                    goTo(.heldCodes)
+                }
 
                 menuRow(icon: "person.crop.circle.fill", tint: .blue,
                         title: "Account",

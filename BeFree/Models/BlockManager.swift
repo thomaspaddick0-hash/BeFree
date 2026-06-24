@@ -7,7 +7,10 @@ import DeviceActivity
 final class BlockManager: ObservableObject {
     @Published var activeBlocks: [Block] = []
     @Published var heldBlocks: [HeldBlock] = []
+    @Published private(set) var unseenHeldCodesCount = 0
     @Published var pendingUnlockDeepLink = false
+
+    private let viewedHeldCodesKey = "viewedHeldCodeIDs"
 
     // Lazy so the XPC connection isn't attempted until first use.
     // All access sites are guarded with #if !targetEnvironment(simulator)
@@ -35,6 +38,20 @@ final class BlockManager: ObservableObject {
         async let held = supabase.fetchBlocksImHolding()
         activeBlocks = (try? await mine) ?? []
         heldBlocks   = (try? await held) ?? []
+        refreshUnseenHeldCodesCount()
+    }
+
+    /// Call when the user opens the held-codes screen so the avatar badge clears.
+    func markHeldCodesAsSeen() {
+        var viewed = Set(UserDefaults.standard.stringArray(forKey: viewedHeldCodesKey) ?? [])
+        viewed.formUnion(heldBlocks.map { $0.id.uuidString })
+        UserDefaults.standard.set(Array(viewed), forKey: viewedHeldCodesKey)
+        refreshUnseenHeldCodesCount()
+    }
+
+    private func refreshUnseenHeldCodesCount() {
+        let viewed = Set(UserDefaults.standard.stringArray(forKey: viewedHeldCodesKey) ?? [])
+        unseenHeldCodesCount = heldBlocks.filter { !viewed.contains($0.id.uuidString) }.count
     }
 
     /// The shield's "Enter unlock code" button can't open us directly (no public

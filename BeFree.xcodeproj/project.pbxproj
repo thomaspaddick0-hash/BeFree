@@ -18,6 +18,7 @@
 		537E50327C80CFA24806AFE9 /* BlockRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D7F5119967DB1805290710 /* BlockRowView.swift */; };
 		57EEEE54436F81F52A5E7DA8 /* HeldCodesDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F58BAFC52316D83ECBF63D0 /* HeldCodesDrawer.swift */; };
 		58DE191905E32A77E58174FD /* ShieldActionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 532F602C7F61A893660D9286 /* ShieldActionExtension.swift */; };
+		6C824BDEAC38408C52344371 /* AppleSignInIconButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E8467252C6E10DEC01C4FEA /* AppleSignInIconButton.swift */; };
 		7F99735C5196E0850C7388E9 /* BeFreeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E980152227A523FCF1DFCC /* BeFreeApp.swift */; };
 		90B14F8031AADD626271D74B /* AppDomainMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7478341859E657553E784F3E /* AppDomainMap.swift */; };
 		AF101358C6179F7F53867B29 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 1E4548E28B693FA3D655D0B3 /* Assets.xcassets */; };
@@ -78,6 +79,7 @@
 		1E4548E28B693FA3D655D0B3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		1F7F0C08175A8A43AF25CD98 /* BeFree.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BeFree.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		299D7B50D986650A9A850AF3 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
+		3E8467252C6E10DEC01C4FEA /* AppleSignInIconButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppleSignInIconButton.swift; sourceTree = "<group>"; };
 		3F9E5BAFCB7C529F667941B1 /* BlockManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockManager.swift; sourceTree = "<group>"; };
 		4716221901B0E1FE88B68069 /* DeviceActivityMonitorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceActivityMonitorExtension.swift; sourceTree = "<group>"; };
 		4C29E5B04013A278BC940BE7 /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
@@ -165,6 +167,7 @@
 		C492535191477625B7270826 /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				3E8467252C6E10DEC01C4FEA /* AppleSignInIconButton.swift */,
 				80DCBD53E2D337BF8B811636 /* BlockCreationView.swift */,
 				A8D7F5119967DB1805290710 /* BlockRowView.swift */,
 				75616AF6B651EEA9C9C46222 /* BrandMark.swift */,
@@ -353,6 +356,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				90B14F8031AADD626271D74B /* AppDomainMap.swift in Sources */,
+				6C824BDEAC38408C52344371 /* AppleSignInIconButton.swift in Sources */,
 				7F99735C5196E0850C7388E9 /* BeFreeApp.swift in Sources */,
 				423D9A9310C8F0B575C83566 /* Block.swift in Sources */,
 				DB34950B3E4FE0687DD51D9B /* BlockCreationView.swift in Sources */,
