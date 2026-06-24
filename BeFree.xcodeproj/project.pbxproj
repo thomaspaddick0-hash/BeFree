@@ -25,6 +25,7 @@
 		BD7D172B03D5C15E05738205 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D346BAC44B6597BC19C253AB /* ContentView.swift */; };
 		C95EE1465D6E98383820DAA3 /* BeFreeShieldAction.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A65628CC586F0790851CE2F3 /* BeFreeShieldAction.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		D92321F94E220C8FB359DE3D /* UnlockView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D2F073DFD953DD7639071EEE /* UnlockView.swift */; };
+		DAA7DAC75CDBB8A924591994 /* BrandMark.swift in Sources */ = {isa = PBXBuildFile; fileRef = 75616AF6B651EEA9C9C46222 /* BrandMark.swift */; };
 		DB34950B3E4FE0687DD51D9B /* BlockCreationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 80DCBD53E2D337BF8B811636 /* BlockCreationView.swift */; };
 		DD0AD3262928024CAA5FF34C /* Secrets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 299D7B50D986650A9A850AF3 /* Secrets.swift */; };
 		DD5BA0E5AB541D0188891A38 /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 52EE7061F893CF0A4E39A99D /* SupabaseService.swift */; };
@@ -85,6 +86,7 @@
 		5F58BAFC52316D83ECBF63D0 /* HeldCodesDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeldCodesDrawer.swift; sourceTree = "<group>"; };
 		6554FECB9EAC14FB4ADC9BFC /* ResendService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResendService.swift; sourceTree = "<group>"; };
 		7478341859E657553E784F3E /* AppDomainMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDomainMap.swift; sourceTree = "<group>"; };
+		75616AF6B651EEA9C9C46222 /* BrandMark.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BrandMark.swift; sourceTree = "<group>"; };
 		80DCBD53E2D337BF8B811636 /* BlockCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockCreationView.swift; sourceTree = "<group>"; };
 		8FCEFAA98137AA9B6F8AD1B2 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		968206643C4A9592AC9CED44 /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
@@ -165,6 +167,7 @@
 			children = (
 				80DCBD53E2D337BF8B811636 /* BlockCreationView.swift */,
 				A8D7F5119967DB1805290710 /* BlockRowView.swift */,
+				75616AF6B651EEA9C9C46222 /* BrandMark.swift */,
 				5F58BAFC52316D83ECBF63D0 /* HeldCodesDrawer.swift */,
 				8FCEFAA98137AA9B6F8AD1B2 /* HomeView.swift */,
 				0DABEA9D24980241BC871A39 /* MenuDrawer.swift */,
@@ -355,6 +358,7 @@
 				DB34950B3E4FE0687DD51D9B /* BlockCreationView.swift in Sources */,
 				2A4C18A18AE2457557FCD98A /* BlockManager.swift in Sources */,
 				537E50327C80CFA24806AFE9 /* BlockRowView.swift in Sources */,
+				DAA7DAC75CDBB8A924591994 /* BrandMark.swift in Sources */,
 				BD7D172B03D5C15E05738205 /* ContentView.swift in Sources */,
 				57EEEE54436F81F52A5E7DA8 /* HeldCodesDrawer.swift in Sources */,
 				2A0F805CEAE1AB67A114D9D6 /* HomeView.swift in Sources */,

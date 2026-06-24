@@ -36,6 +36,9 @@ struct HomeView: View {
         .navigationTitle("BeFree")
         .navigationBarTitleDisplayMode(.large)
         .toolbar {
+            ToolbarItem(placement: .navigationBarLeading) {
+                FeatherMark(size: 24, color: .green)
+            }
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {

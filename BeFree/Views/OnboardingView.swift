@@ -11,51 +11,50 @@ struct OnboardingView: View {
     // Held across ASAuthorizationAppleIDRequest → onCompletion so nonces match.
     @State private var currentNonce: String?
 
+    private var isBusy: Bool { isSigningInApple || isSigningInGoogle }
+
     var body: some View {
-        VStack(spacing: 0) {
-            Spacer()
+        ZStack {
+            Color(.systemGroupedBackground)
+                .ignoresSafeArea()
 
-            VStack(spacing: 24) {
-                Image(systemName: "lock.shield.fill")
-                    .font(.system(size: 80))
-                    .foregroundStyle(.green)
-
-                VStack(spacing: 12) {
-                    Text("BeFree")
-                        .font(.largeTitle.bold())
-
-                    Text("Block apps you're trying to avoid and send the unlock code to a trusted friend. You can't undo it yourself.")
-                        .font(.body)
-                        .foregroundStyle(.secondary)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-
+            ScrollView {
                 VStack(spacing: 16) {
-                    featureRow(icon: "hand.raised.fill", color: .red,
-                               title: "You block yourself",
-                               detail: "Pick an app and lock it down.")
-                    featureRow(icon: "envelope.fill", color: .blue,
-                               title: "A friend holds the code",
-                               detail: "They get the 4-digit unlock code by email.")
-                    featureRow(icon: "stopwatch.fill", color: .orange,
-                               title: "See how long you've stayed clean",
-                               detail: "A live timer tracks your streak.")
+                    signInCard
+                    permissionNote
                 }
-                .padding(.horizontal)
+                .frame(maxWidth: 460)
+                .padding(.horizontal, 20)
+                .padding(.vertical, 40)
+                .frame(maxWidth: .infinity, minHeight: cardMinHeight)
+            }
+        }
+    }
+
+    private var cardMinHeight: CGFloat {
+        UIScreen.main.bounds.height - 40
+    }
+
+    // MARK: - Card
+
+    private var signInCard: some View {
+        VStack(spacing: 24) {
+            BeFreeWordmark(style: .hero, color: .green)
+                .padding(.top, 8)
+
+            Text("Block the apps you can't put down — a friend holds the key.")
+                .font(.body)
+                .foregroundStyle(.secondary)
+                .multilineTextAlignment(.center)
+
+            if let errorMessage {
+                Text(errorMessage)
+                    .font(.subheadline)
+                    .foregroundStyle(.red)
+                    .multilineTextAlignment(.center)
             }
 
-            Spacer()
-
-            VStack(spacing: 12) {
-                if let errorMessage {
-                    Text(errorMessage)
-                        .font(.subheadline)
-                        .foregroundStyle(.red)
-                        .multilineTextAlignment(.center)
-                        .padding(.horizontal)
-                }
-
+            VStack(spacing: 14) {
                 // Sign in with Apple — Apple's official button, required by App Store guideline 4.8
                 SignInWithAppleButton(.signIn) { request in
                     let nonce = randomNonceString()
@@ -66,22 +65,50 @@ struct OnboardingView: View {
                     Task { await handleAppleResult(result) }
                 }
                 .signInWithAppleButtonStyle(.black)
-                .frame(height: 54)
+                .frame(height: 52)
                 .cornerRadius(12)
-                .padding(.horizontal, 24)
-                .disabled(isSigningInApple || isSigningInGoogle)
-                .opacity((isSigningInApple || isSigningInGoogle) ? 0.6 : 1)
+                .disabled(isBusy)
+                .opacity(isBusy ? 0.6 : 1)
+
+                orDivider
 
                 googleSignInButton
-
-                Text("Screen Time permission will be requested when you block your first app.")
-                    .font(.caption)
-                    .foregroundStyle(.tertiary)
-                    .multilineTextAlignment(.center)
-                    .padding(.horizontal)
             }
-            .padding(.bottom, 48)
         }
+        .padding(.horizontal, 28)
+        .padding(.vertical, 36)
+        .frame(maxWidth: .infinity)
+        .background(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .fill(Color(.secondarySystemGroupedBackground))
+        )
+        .overlay(
+            RoundedRectangle(cornerRadius: 20, style: .continuous)
+                .stroke(Color(.separator).opacity(0.5), lineWidth: 1)
+        )
+        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+    }
+
+    private var orDivider: some View {
+        HStack(spacing: 12) {
+            Rectangle()
+                .fill(Color(.separator))
+                .frame(height: 1)
+            Text("OR")
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+            Rectangle()
+                .fill(Color(.separator))
+                .frame(height: 1)
+        }
+    }
+
+    private var permissionNote: some View {
+        Text("Screen Time permission will be requested when you block your first app.")
+            .font(.caption)
+            .foregroundStyle(.tertiary)
+            .multilineTextAlignment(.center)
+            .padding(.horizontal, 12)
     }
 
     // MARK: - Google button
@@ -103,19 +130,18 @@ struct OnboardingView: View {
                     .foregroundStyle(.primary)
             }
             .frame(maxWidth: .infinity)
-            .frame(height: 54)
+            .frame(height: 52)
             .background(
                 RoundedRectangle(cornerRadius: 12)
                     .fill(Color(.systemBackground))
-                    .shadow(color: .black.opacity(0.12), radius: 4, x: 0, y: 2)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 12)
                     .stroke(Color(.systemGray4), lineWidth: 1)
             )
         }
-        .disabled(isSigningInGoogle || isSigningInApple)
-        .padding(.horizontal, 24)
+        .disabled(isBusy)
+        .opacity(isBusy ? 0.6 : 1)
     }
 
     private var googleLogo: some View {
@@ -136,22 +162,6 @@ struct OnboardingView: View {
         }
     }
 
-    // MARK: - Feature rows
-
-    private func featureRow(icon: String, color: Color, title: String, detail: String) -> some View {
-        HStack(alignment: .top, spacing: 16) {
-            Image(systemName: icon)
-                .font(.title2)
-                .foregroundStyle(color)
-                .frame(width: 32)
-            VStack(alignment: .leading, spacing: 2) {
-                Text(title).font(.subheadline.weight(.semibold))
-                Text(detail).font(.subheadline).foregroundStyle(.secondary)
-            }
-            Spacer()
-        }
-    }
-
     // MARK: - Actions
 
     private func signInWithGoogle() async {
@@ -159,8 +169,10 @@ struct OnboardingView: View {
         errorMessage = nil
         do {
             try await SupabaseService.shared.signInWithGoogle()
+        } catch is CancellationError {
+            // User dismissed the web auth sheet — not an error.
         } catch {
-            errorMessage = "Sign in failed. Please try again."
+            errorMessage = friendlyError(error)
         }
         isSigningInGoogle = false
     }
@@ -182,7 +194,7 @@ struct OnboardingView: View {
             do {
                 try await SupabaseService.shared.signInWithApple(idToken: idToken, nonce: nonce)
             } catch {
-                errorMessage = "Sign in failed. Please try again."
+                errorMessage = friendlyError(error)
             }
             isSigningInApple = false
 
@@ -190,9 +202,14 @@ struct OnboardingView: View {
             // ASAuthorizationError.canceled means the user dismissed the sheet — not an error.
             let code = (error as? ASAuthorizationError)?.code
             if code != .canceled {
-                errorMessage = "Sign in failed. Please try again."
+                errorMessage = friendlyError(error)
             }
         }
+    }
+
+    /// Surfaces the underlying reason so dashboard/config problems are visible during testing.
+    private func friendlyError(_ error: Error) -> String {
+        "Sign in failed: \(error.localizedDescription)"
     }
 
     // MARK: - Nonce helpers

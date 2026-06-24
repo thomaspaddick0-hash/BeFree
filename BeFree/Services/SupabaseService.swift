@@ -75,15 +75,16 @@ final class SupabaseService: ObservableObject {
         }
     }
 
+    /// Presents Google sign-in in an in-app ASWebAuthenticationSession and completes the
+    /// session exchange internally — no external Safari round-trip required.
     func signInWithGoogle() async throws {
-        let url = try await client.auth.getOAuthSignInURL(
+        try await client.auth.signInWithOAuth(
             provider: .google,
-            redirectTo: URL(string: "befree://auth-callback")!
+            redirectTo: URL(string: "befree://auth-callback")
         )
-        await UIApplication.shared.open(url)
     }
 
-    /// Called from BeFreeApp.onOpenURL when Safari hands back the befree://auth-callback URL.
+    /// Kept for any external-browser callbacks (e.g. magic links) that re-enter via the URL scheme.
     func handleAuthCallback(url: URL) async {
         _ = try? await client.auth.session(from: url)
     }

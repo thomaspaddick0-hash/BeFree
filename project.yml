@@ -77,8 +77,10 @@ targets:
       path: BeFree/BeFree.entitlements
       properties:
         com.apple.security.application-groups:
-          - group.com.befree.app
+          - group.com.timetobefree.app
         com.apple.developer.family-controls: true
+        com.apple.developer.applesignin:
+          - Default
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.befree.app
@@ -113,7 +115,7 @@ targets:
       path: BeFreeShield/BeFreeShield.entitlements
       properties:
         com.apple.security.application-groups:
-          - group.com.befree.app
+          - group.com.timetobefree.app
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.befree.app.shield
@@ -139,7 +141,7 @@ targets:
       path: BeFreeShieldAction/BeFreeShieldAction.entitlements
       properties:
         com.apple.security.application-groups:
-          - group.com.befree.app
+          - group.com.timetobefree.app
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.befree.app.shieldaction
@@ -165,7 +167,7 @@ targets:
       path: BeFreeMonitor/BeFreeMonitor.entitlements
       properties:
         com.apple.security.application-groups:
-          - group.com.befree.app
+          - group.com.timetobefree.app
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.befree.app.monitor
