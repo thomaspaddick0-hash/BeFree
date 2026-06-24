@@ -36,9 +36,23 @@ final class BlockManager: ObservableObject {
         do { try await supabase.signInIfNeeded() } catch { return }
         async let mine = supabase.fetchActiveBlocks()
         async let held = supabase.fetchBlocksImHolding()
-        activeBlocks = (try? await mine) ?? []
+        let fetched = (try? await mine) ?? []
+        activeBlocks = hydrateSelections(into: fetched)
         heldBlocks   = (try? await held) ?? []
         refreshUnseenHeldCodesCount()
+        reapplyRestrictions()
+    }
+
+    /// Re-shield apps after relaunch or returning from background. Tokens live locally,
+    /// not in Supabase — without this, force-quitting the app clears all blocks.
+    func reapplyRestrictions() {
+        #if !targetEnvironment(simulator)
+        rebuildShield()
+        rebuildWebFilter()
+        if !activeBlocks.filter(\.isActive).isEmpty {
+            startMonitoringIfNeeded()
+        }
+        #endif
     }
 
     /// Call when the user opens the held-codes screen so the avatar badge clears.
@@ -166,10 +180,34 @@ final class BlockManager: ObservableObject {
             StoredSelection(
                 blockId: block.id.uuidString,
                 selectionData: block.activitySelectionData,
-                domains: block.blockedDomains
+                domains: block.blockedDomains,
+                appName: block.appName
             )
         }
         sharedDefaults.set(try? JSONEncoder().encode(selections), forKey: "storedSelections")
+    }
+
+    /// Merge opaque picker tokens (and cached app names) from local storage into
+    /// blocks fetched from Supabase, which doesn't persist ApplicationTokens.
+    private func hydrateSelections(into blocks: [Block]) -> [Block] {
+        guard
+            let data = sharedDefaults.data(forKey: "storedSelections"),
+            let stored = try? JSONDecoder().decode([StoredSelection].self, from: data)
+        else { return blocks }
+
+        let byId = Dictionary(stored.map { ($0.blockId, $0) }, uniquingKeysWith: { first, _ in first })
+        return blocks.map { block in
+            var updated = block
+            guard let entry = byId[block.id.uuidString] else { return updated }
+            if updated.activitySelectionData == nil {
+                updated.activitySelectionData = entry.selectionData
+            }
+            if updated.appName.isEmpty || updated.appName == "your app",
+               let name = entry.appName, !name.isEmpty, name != "your app" {
+                updated.appName = name
+            }
+            return updated
+        }
     }
 
     #if !targetEnvironment(simulator)
@@ -219,4 +257,5 @@ private struct StoredSelection: Codable {
     let blockId: String
     let selectionData: Data?
     let domains: [String]
+    let appName: String?
 }

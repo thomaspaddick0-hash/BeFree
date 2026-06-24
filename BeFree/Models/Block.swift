@@ -14,7 +14,7 @@ struct HeldBlock: Identifiable {
 
 struct Block: Identifiable, Codable {
     let id: UUID
-    let appName: String
+    var appName: String
     let blockedDomains: [String]
     let friendEmail: String
     let blockedAt: Date

@@ -27,8 +27,8 @@ struct BlockCreationView: View {
     @State private var mockSelected = false            // simulator-only stand-in
     @State private var authError = false
 
-    // What we'll record + email. Filled in on the website screen.
-    @State private var blockAppName = "your app"
+    // Human-readable name for Supabase + emails. Apple doesn't expose the picked app's name.
+    @State private var blockAppName = ""
     @State private var selectedDomains: Set<String> = []
     @State private var customURL = ""
 
@@ -142,6 +142,19 @@ struct BlockCreationView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text("Which app did you pick?")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        TextField("e.g. Letterboxd", text: $blockAppName)
+                            .textInputAutocapitalization(.words)
+                            .autocorrectionDisabled()
+                            .padding(16)
+                            .background(Color(.systemBackground))
+                            .clipShape(RoundedRectangle(cornerRadius: 14))
+                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.green.opacity(0.6), lineWidth: 1.5))
+                    }
+
                     Text("Block it on the web too, so it isn't just a tap away in Safari. This step is optional.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
@@ -171,7 +184,7 @@ struct BlockCreationView: View {
                 .padding(.bottom, 24)
             }
 
-            primaryButton("Continue", enabled: true) { continueFromWebsite() }
+            primaryButton("Continue", enabled: canContinueFromWebsite) { continueFromWebsite() }
         }
         .background(Color(.systemGroupedBackground))
         .navigationBarTitleDisplayMode(.inline)
@@ -256,21 +269,39 @@ struct BlockCreationView: View {
         customURL = ""
     }
 
+    private var canContinueFromWebsite: Bool {
+        !resolvedAppName.isEmpty
+    }
+
+    private var resolvedAppName: String {
+        let typed = blockAppName.trimmingCharacters(in: .whitespaces)
+        if !typed.isEmpty { return typed }
+        return deriveAppName(from: Array(selectedDomains))
+    }
+
     private func continueFromWebsite() {
         addCustomURL()   // fold in anything left typed but not yet added
         let domains = Array(selectedDomains)
-        blockAppName = deriveAppName(from: domains)
+        blockAppName = resolvedAppName
         blockManager.applyPendingWebDomains(domains)
         path.append(.email)
     }
 
-    /// Pick a human-readable name for the record/email: a known chip name if one
-    /// is selected, otherwise the first domain, otherwise a generic fallback.
+    /// Pick a human-readable name: typed name wins, then a known chip, then title-cased domain.
     private func deriveAppName(from domains: [String]) -> String {
         if let chip = suggestedChips.first(where: { selectedDomains.contains($0.domain) }) {
             return chip.name
         }
-        return domains.first ?? "your app"
+        if let domain = domains.first {
+            return titleCasedAppName(from: domain)
+        }
+        return ""
+    }
+
+    private func titleCasedAppName(from domain: String) -> String {
+        let base = domain.components(separatedBy: ".").first ?? domain
+        guard !base.isEmpty else { return "" }
+        return base.prefix(1).uppercased() + base.dropFirst()
     }
 
     /// Strip scheme / www / path so we store a bare host like "example.com".

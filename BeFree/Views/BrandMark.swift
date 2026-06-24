@@ -1,22 +1,28 @@
 import SwiftUI
 
-/// The BeFree feather glyph. Backed by a template asset so it tints with `color`.
+/// The BeFree feather glyph from the original artwork.
+/// Uses alpha masking (not template mode) so iOS tints the silhouette correctly.
 struct FeatherMark: View {
     var size: CGFloat = 40
     var color: Color = .green
 
+    private var featherWidth: CGFloat { size * 0.88 }
+
     var body: some View {
-        Image("Feather")
-            .renderingMode(.template)
-            .resizable()
-            .scaledToFit()
-            .foregroundStyle(color)
-            .frame(width: size, height: size)
+        Rectangle()
+            .fill(color)
+            .frame(width: featherWidth, height: size)
+            .mask {
+                Image("Feather")
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: featherWidth, height: size)
+            }
             .accessibilityHidden(true)
     }
 }
 
-/// The BeFree logo lockup: feather + wordmark. Use `.hero` on the login screen
+/// The BeFree logo lockup: wordmark + feather. Use `.hero` on splash/login screens
 /// and `.compact` for navigation bars / inline branding.
 struct BeFreeWordmark: View {
     enum Style {
@@ -64,13 +70,13 @@ struct BeFreeWordmark: View {
         Group {
             if style.isHorizontal {
                 HStack(spacing: style.spacing) {
-                    FeatherMark(size: style.featherSize, color: color)
                     wordmarkText
+                    FeatherMark(size: style.featherSize, color: color)
                 }
             } else {
                 VStack(spacing: style.spacing) {
-                    FeatherMark(size: style.featherSize, color: color)
                     wordmarkText
+                    FeatherMark(size: style.featherSize, color: color)
                 }
             }
         }
@@ -87,9 +93,14 @@ struct BeFreeWordmark: View {
 
 #Preview {
     VStack(spacing: 40) {
-        BeFreeWordmark(style: .hero)
+        BeFreeWordmark(style: .hero, color: .green, textColor: .primary)
+        BeFreeWordmark(style: .horizontalHero, color: Color(red: 0.10, green: 0.14, blue: 0.49), textColor: Color(red: 0.10, green: 0.14, blue: 0.49))
         BeFreeWordmark(style: .compact)
-        FeatherMark(size: 30, color: .secondary)
+        ZStack {
+            Color(red: 0.10, green: 0.14, blue: 0.49)
+            BeFreeWordmark(style: .horizontalHero, color: .white, textColor: .white)
+        }
+        .frame(height: 120)
     }
     .padding()
 }

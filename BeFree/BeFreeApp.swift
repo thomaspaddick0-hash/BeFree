@@ -23,7 +23,10 @@ struct BeFreeApp: App {
                     }
                 }
                 .onChange(of: scenePhase) { phase in
-                    if phase == .active { blockManager.checkPendingUnlockFlag() }
+                    if phase == .active {
+                        blockManager.checkPendingUnlockFlag()
+                        blockManager.reapplyRestrictions()
+                    }
                 }
         }
     }
