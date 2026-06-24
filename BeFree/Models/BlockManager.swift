@@ -6,6 +6,7 @@ import DeviceActivity
 @MainActor
 final class BlockManager: ObservableObject {
     @Published var activeBlocks: [Block] = []
+    @Published var heldBlocks: [HeldBlock] = []
     @Published var pendingUnlockDeepLink = false
 
     // Lazy so the XPC connection isn't attempted until first use.
@@ -30,8 +31,10 @@ final class BlockManager: ObservableObject {
 
     func loadBlocks() async {
         do { try await supabase.signInIfNeeded() } catch { return }
-        guard let blocks = try? await supabase.fetchActiveBlocks() else { return }
-        activeBlocks = blocks
+        async let mine = supabase.fetchActiveBlocks()
+        async let held = supabase.fetchBlocksImHolding()
+        activeBlocks = (try? await mine) ?? []
+        heldBlocks   = (try? await held) ?? []
     }
 
     /// The shield's "Enter unlock code" button can't open us directly (no public
@@ -81,6 +84,7 @@ final class BlockManager: ObservableObject {
     func finalizePendingBlock(appName: String, friendEmail: String, userName: String) async throws {
         try await supabase.signInIfNeeded()
 
+        let displayName = supabase.currentUserDisplayName
         let selection = pendingSelection
         let domains = pendingDomains
         let code = String(format: "%04d", Int.random(in: 0...9999))
@@ -98,7 +102,7 @@ final class BlockManager: ObservableObject {
 
         guard let userID = supabase.currentUserID else { throw BeFreeError.notSignedIn }
         try await supabase.insertBlock(block, code: code, userID: userID)
-        try await resend.sendCode(code, appName: appName, toEmail: friendEmail, userName: userName)
+        try await resend.sendCode(code, appName: appName, toEmail: friendEmail, userName: displayName)
 
         var stored = storedBlocks()
         stored[block.id.uuidString] = now

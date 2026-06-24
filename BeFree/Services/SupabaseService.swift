@@ -1,9 +1,13 @@
 import Foundation
+import UIKit
 import CryptoKit
 import Supabase
 
-final class SupabaseService {
+@MainActor
+final class SupabaseService: ObservableObject {
     static let shared = SupabaseService()
+
+    @Published var isSignedIn = false
 
     let client = SupabaseClient(
         supabaseURL: URL(string: Secrets.supabaseURL)!,
@@ -13,17 +17,73 @@ final class SupabaseService {
         )
     )
 
-    var currentUserID: UUID? {
-        client.auth.currentUser?.id
+    private init() {
+        Task { await observeAuthState() }
     }
 
-    func signInIfNeeded() async throws {
-        do {
-            _ = try await client.auth.session
-        } catch {
-            try await client.auth.signInAnonymously()
+    var currentUserID: UUID? { client.auth.currentUser?.id }
+
+    /// Best available display name from the signed-in user's auth profile (Google/Apple metadata).
+    var currentUserDisplayName: String {
+        guard let user = client.auth.currentUser else { return "Someone" }
+        for key in ["full_name", "name"] {
+            if let val = user.userMetadata[key],
+               let data = try? JSONEncoder().encode(val),
+               let name = try? JSONDecoder().decode(String.self, from: data),
+               !name.isEmpty {
+                return name
+            }
+        }
+        return user.email?.components(separatedBy: "@").first ?? "Someone"
+    }
+
+    // MARK: - Auth
+
+    private func observeAuthState() async {
+        for await (event, session) in client.auth.authStateChanges {
+            switch event {
+            case .initialSession:
+                isSignedIn = session != nil
+            case .signedIn, .tokenRefreshed, .userUpdated:
+                isSignedIn = true
+            case .signedOut:
+                isSignedIn = false
+            default:
+                break
+            }
         }
     }
+
+    func signInWithGoogle() async throws {
+        let url = try await client.auth.getOAuthSignInURL(
+            provider: .google,
+            redirectTo: URL(string: "befree://auth-callback")!
+        )
+        await UIApplication.shared.open(url)
+    }
+
+    /// Called from BeFreeApp.onOpenURL when Safari hands back the befree://auth-callback URL.
+    func handleAuthCallback(url: URL) async {
+        _ = try? await client.auth.session(from: url)
+    }
+
+    /// Sign in with an Apple ID token obtained from ASAuthorizationAppleIDProvider.
+    func signInWithApple(idToken: String, nonce: String) async throws {
+        try await client.auth.signInWithIdToken(
+            credentials: .init(provider: .apple, idToken: idToken, nonce: nonce)
+        )
+    }
+
+    func signOut() async throws {
+        try await client.auth.signOut()
+    }
+
+    /// Verifies a session exists; throws if the user is not signed in.
+    func signInIfNeeded() async throws {
+        _ = try await client.auth.session
+    }
+
+    // MARK: - Blocks
 
     func fetchActiveBlocks() async throws -> [Block] {
         let rows: [SupabaseBlock] = try await client
@@ -36,8 +96,50 @@ final class SupabaseService {
     }
 
     func insertBlock(_ block: Block, code: String, userID: UUID) async throws {
-        let payload = SupabaseBlock(from: block, codeHash: sha256(code), userID: userID)
+        let payload = SupabaseBlock(
+            from: block,
+            code: code,
+            codeHash: sha256(code),
+            userID: userID,
+            userName: currentUserDisplayName
+        )
         try await client.from("blocks").insert(payload).execute()
+    }
+
+    /// Returns blocks where the current user is the designated code-holder.
+    /// Requires a Supabase RLS policy: friend_email = auth.email()
+    func fetchBlocksImHolding() async throws -> [HeldBlock] {
+        guard let email = client.auth.currentUser?.email else { return [] }
+
+        struct HeldRow: Decodable {
+            let id: String
+            let appName: String
+            let code: String?
+            let userName: String?
+            let blockedAt: String
+            enum CodingKeys: String, CodingKey {
+                case id, appName = "app_name", code, userName = "user_name", blockedAt = "blocked_at"
+            }
+        }
+
+        let rows: [HeldRow] = try await client
+            .from("blocks")
+            .select("id, app_name, code, user_name, blocked_at")
+            .eq("friend_email", value: email)
+            .filter("unlocked_at", operator: "is", value: "null")
+            .execute()
+            .value
+
+        return rows.compactMap { row in
+            guard let code = row.code else { return nil }
+            return HeldBlock(
+                id: UUID(uuidString: row.id) ?? UUID(),
+                blockerName: row.userName ?? "Your friend",
+                appName: row.appName,
+                code: code,
+                blockedAt: ISO8601DateFormatter().date(from: row.blockedAt) ?? Date()
+            )
+        }
     }
 
     func verifyAndUnlock(blockId: UUID, code: String) async throws {
@@ -74,23 +176,28 @@ private struct SupabaseBlock: Codable {
     var appName: String
     var blockedDomains: [String]
     var friendEmail: String
+    var code: String?
     var codeHash: String
+    var userName: String?
     var blockedAt: String
     var unlockedAt: String?
 
     enum CodingKeys: String, CodingKey {
         case id, userId = "user_id", appName = "app_name"
         case friendEmail = "friend_email", blockedDomains = "blocked_domains"
-        case codeHash = "code_hash", blockedAt = "blocked_at", unlockedAt = "unlocked_at"
+        case code, codeHash = "code_hash", userName = "user_name"
+        case blockedAt = "blocked_at", unlockedAt = "unlocked_at"
     }
 
-    init(from block: Block, codeHash: String, userID: UUID) {
+    init(from block: Block, code: String, codeHash: String, userID: UUID, userName: String) {
         self.id = block.id.uuidString
         self.userId = userID.uuidString
         self.appName = block.appName
         self.blockedDomains = block.blockedDomains
         self.friendEmail = block.friendEmail
+        self.code = code
         self.codeHash = codeHash
+        self.userName = userName
         self.blockedAt = ISO8601DateFormatter().string(from: block.blockedAt)
         self.unlockedAt = block.unlockedAt.map { ISO8601DateFormatter().string(from: $0) }
     }
@@ -106,6 +213,8 @@ private struct SupabaseBlock: Codable {
         )
     }
 }
+
+// MARK: - Errors
 
 enum BeFreeError: LocalizedError {
     case serverError, blockNotFound, wrongCode, notSignedIn

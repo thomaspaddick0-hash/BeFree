@@ -21,8 +21,13 @@ class ShieldActionExtension: ShieldActionDelegate {
             // then dismiss the shield to the Home Screen.
             sharedDefaults?.set(true, forKey: "pendingUnlock")
             completionHandler(.close)
-        case .secondaryButtonPressed:
-            // "Go back" — send the user back to the Home Screen.
+        case .secondaryButtonPressed,
+             .firstSecondarySubmenuItemPressed,
+             .secondSecondarySubmenuItemPressed,
+             .thirdSecondarySubmenuItemPressed:
+            // "Go back" — send the user back to the Home Screen. The shield
+            // doesn't configure a secondary submenu, but the enum cases must
+            // still be handled for the switch to be exhaustive.
             completionHandler(.close)
         @unknown default:
             completionHandler(.close)

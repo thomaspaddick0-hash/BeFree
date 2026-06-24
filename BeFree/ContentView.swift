@@ -2,18 +2,16 @@ import SwiftUI
 
 struct ContentView: View {
     @EnvironmentObject var blockManager: BlockManager
-    @AppStorage("hasCompletedOnboarding") private var hasCompletedOnboarding = false
+    @ObservedObject private var auth = SupabaseService.shared
 
     var body: some View {
-        if hasCompletedOnboarding {
+        if auth.isSignedIn {
             NavigationStack {
                 HomeView()
             }
             .task { await blockManager.loadBlocks() }
         } else {
-            OnboardingView {
-                hasCompletedOnboarding = true
-            }
+            OnboardingView()
         }
     }
 }
