@@ -22,11 +22,13 @@ struct BeFreeWordmark: View {
     enum Style {
         case hero
         case compact
+        case horizontalHero
 
         var featherSize: CGFloat {
             switch self {
             case .hero: return 64
             case .compact: return 22
+            case .horizontalHero: return 52
             }
         }
 
@@ -34,6 +36,7 @@ struct BeFreeWordmark: View {
             switch self {
             case .hero: return 44
             case .compact: return 20
+            case .horizontalHero: return 36
             }
         }
 
@@ -41,36 +44,44 @@ struct BeFreeWordmark: View {
             switch self {
             case .hero: return 8
             case .compact: return 6
+            case .horizontalHero: return 12
+            }
+        }
+
+        var isHorizontal: Bool {
+            switch self {
+            case .hero: return false
+            case .compact, .horizontalHero: return true
             }
         }
     }
 
     var style: Style = .hero
     var color: Color = .green
+    var textColor: Color = .primary
 
     var body: some View {
-        switch style {
-        case .hero:
-            VStack(spacing: style.spacing) {
-                FeatherMark(size: style.featherSize, color: color)
-                wordmarkText
+        Group {
+            if style.isHorizontal {
+                HStack(spacing: style.spacing) {
+                    FeatherMark(size: style.featherSize, color: color)
+                    wordmarkText
+                }
+            } else {
+                VStack(spacing: style.spacing) {
+                    FeatherMark(size: style.featherSize, color: color)
+                    wordmarkText
+                }
             }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("BeFree")
-        case .compact:
-            HStack(spacing: style.spacing) {
-                FeatherMark(size: style.featherSize, color: color)
-                wordmarkText
-            }
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("BeFree")
         }
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel("BeFree")
     }
 
     private var wordmarkText: some View {
         Text("BeFree")
             .font(.system(size: style.fontSize, weight: .bold, design: .rounded))
-            .foregroundStyle(.primary)
+            .foregroundStyle(textColor)
     }
 }
 

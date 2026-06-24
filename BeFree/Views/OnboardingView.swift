@@ -2,156 +2,171 @@ import SwiftUI
 import AuthenticationServices
 import CryptoKit
 
+// MARK: - Theme
+
+private enum AuthTheme {
+    static let brandBlue = Color(red: 0.10, green: 0.14, blue: 0.49) // #1A237E
+}
+
+// MARK: - Onboarding
+
 struct OnboardingView: View {
     @ObservedObject private var auth = SupabaseService.shared
+
+    @State private var screen: Screen = .splash
     @State private var isSigningInGoogle = false
     @State private var isSigningInApple = false
     @State private var isSubmittingEmail = false
     @State private var errorMessage: String?
     @State private var email = ""
     @State private var password = ""
-    @State private var isEmailSignUp = false
-
-    // Held across ASAuthorizationAppleIDRequest → onCompletion so nonces match.
+    @State private var confirmPassword = ""
     @State private var currentNonce: String?
+
+    private enum Screen {
+        case splash, signUp, login
+    }
 
     private var isBusy: Bool { isSigningInApple || isSigningInGoogle || isSubmittingEmail }
 
     var body: some View {
         ZStack {
-            Color(.systemGroupedBackground)
-                .ignoresSafeArea()
-
-            ScrollView {
-                VStack(spacing: 16) {
-                    signInCard
-                    loginCard
-                    permissionNote
-                }
-                .frame(maxWidth: 460)
-                .padding(.horizontal, 20)
-                .padding(.vertical, 40)
-                .frame(maxWidth: .infinity, minHeight: cardMinHeight)
+            switch screen {
+            case .splash:
+                splashScreen
+                    .transition(.opacity)
+            case .signUp, .login:
+                authScreen
+                    .transition(.opacity)
             }
         }
+        .animation(.easeInOut(duration: 0.45), value: screen)
     }
 
-    private var cardMinHeight: CGFloat {
-        UIScreen.main.bounds.height - 40
-    }
+    // MARK: - Splash
 
-    // MARK: - Card
-
-    private var signInCard: some View {
-        VStack(spacing: 24) {
-            BeFreeWordmark(style: .hero, color: .green)
-                .padding(.top, 8)
-
-            Text("Block the apps you can't put down — a friend holds the key.")
-                .font(.body)
-                .foregroundStyle(.secondary)
-                .multilineTextAlignment(.center)
-
-            if let errorMessage {
-                Text(errorMessage)
-                    .font(.subheadline)
-                    .foregroundStyle(.red)
-                    .multilineTextAlignment(.center)
+    private var splashScreen: some View {
+        AuthTheme.brandBlue
+            .ignoresSafeArea()
+            .overlay {
+                BeFreeWordmark(
+                    style: .horizontalHero,
+                    color: .white,
+                    textColor: .white
+                )
             }
-
-            VStack(spacing: 14) {
-                // Sign in with Apple — Apple's official button, required by App Store guideline 4.8
-                SignInWithAppleButton(.signIn) { request in
-                    let nonce = randomNonceString()
-                    currentNonce = nonce
-                    request.requestedScopes = [.fullName, .email]
-                    request.nonce = sha256(nonce)
-                } onCompletion: { result in
-                    Task { await handleAppleResult(result) }
+            .onAppear {
+                Task {
+                    try? await Task.sleep(nanoseconds: 2_000_000_000)
+                    screen = .signUp
                 }
-                .signInWithAppleButtonStyle(.black)
-                .frame(height: 52)
-                .cornerRadius(12)
-                .disabled(isBusy)
-                .opacity(isBusy ? 0.6 : 1)
-
-                orDivider
-
-                googleSignInButton
             }
-        }
-        .padding(.horizontal, 28)
-        .padding(.vertical, 36)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(Color(.separator).opacity(0.5), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
     }
 
-    private var loginCard: some View {
-        VStack(spacing: 16) {
-            Text("Log in")
-                .font(.headline)
-                .frame(maxWidth: .infinity, alignment: .leading)
+    // MARK: - Auth screens
 
-            authTextField("Email", text: $email)
-                .textContentType(.emailAddress)
-                .keyboardType(.emailAddress)
-                .autocorrectionDisabled()
-                .textInputAutocapitalization(.never)
-
-            authTextField("Password", text: $password, secure: true)
-                .textContentType(isEmailSignUp ? .newPassword : .password)
-
-            Button {
-                Task { await submitEmailAuth() }
-            } label: {
-                Group {
-                    if isSubmittingEmail {
-                        ProgressView().tint(.white)
-                    } else {
-                        Text(isEmailSignUp ? "Sign up" : "Log in")
-                            .font(.headline)
+    private var authScreen: some View {
+        ScrollView {
+            VStack(spacing: 28) {
+                if screen == .signUp {
+                    HStack {
+                        Button { goToLogin() } label: {
+                            Image(systemName: "chevron.left")
+                                .font(.body.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                                .padding(8)
+                        }
+                        Spacer()
                     }
+                    .padding(.horizontal, 4)
                 }
-                .frame(maxWidth: .infinity)
-                .frame(height: 52)
-            }
-            .buttonStyle(.borderedProminent)
-            .tint(.green)
-            .disabled(!canSubmitEmail || isBusy)
-            .opacity(canSubmitEmail && !isBusy ? 1 : 0.6)
 
-            Button {
-                isEmailSignUp.toggle()
-                errorMessage = nil
-            } label: {
-                Text(isEmailSignUp
-                     ? "Already have an account? Log in"
-                     : "Don't have an account? Sign up")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                BeFreeWordmark(
+                    style: .horizontalHero,
+                    color: AuthTheme.brandBlue,
+                    textColor: AuthTheme.brandBlue
+                )
+
+                VStack(spacing: 20) {
+                    Text(screen == .signUp ? "Create your Account" : "Login to your Account")
+                        .font(.title3.weight(.semibold))
+                        .foregroundStyle(.secondary)
+                        .frame(maxWidth: .infinity, alignment: .leading)
+
+                    if let errorMessage {
+                        Text(errorMessage)
+                            .font(.subheadline)
+                            .foregroundStyle(.red)
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                    }
+
+                    authTextField("Email", text: $email)
+                        .textContentType(.emailAddress)
+                        .keyboardType(.emailAddress)
+                        .autocorrectionDisabled()
+                        .textInputAutocapitalization(.never)
+
+                    authTextField("Password", text: $password, secure: true)
+                        .textContentType(screen == .signUp ? .newPassword : .password)
+
+                    if screen == .signUp {
+                        authTextField("Confirm Password", text: $confirmPassword, secure: true)
+                            .textContentType(.newPassword)
+                    }
+
+                    primaryButton(
+                        screen == .signUp ? "Sign up" : "Sign in",
+                        enabled: screen == .signUp ? canSubmitSignUp : canSubmitLogin
+                    ) {
+                        Task { await submitEmailAuth() }
+                    }
+
+                    socialDivider(screen == .signUp ? "Or sign up with" : "Or sign in with")
+
+                    socialButtonsRow
+                }
+
+                if screen == .login {
+                    Button { goToSignUp() } label: {
+                        HStack(spacing: 4) {
+                            Text("Don't have an account?")
+                                .foregroundStyle(.secondary)
+                            Text("Sign up")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(AuthTheme.brandBlue)
+                        }
+                        .font(.subheadline)
+                    }
+                    .padding(.top, 8)
+                } else {
+                    Button { goToLogin() } label: {
+                        HStack(spacing: 4) {
+                            Text("Already have an account?")
+                                .foregroundStyle(.secondary)
+                            Text("Log in")
+                                .fontWeight(.semibold)
+                                .foregroundStyle(AuthTheme.brandBlue)
+                        }
+                        .font(.subheadline)
+                    }
+                    .padding(.top, 8)
+                }
+
+                Text("Screen Time permission will be requested when you block your first app.")
+                    .font(.caption)
+                    .foregroundStyle(.tertiary)
+                    .multilineTextAlignment(.center)
+                    .padding(.top, 4)
             }
+            .padding(.horizontal, 28)
+            .padding(.vertical, 32)
+            .frame(maxWidth: 460)
+            .frame(maxWidth: .infinity, minHeight: UIScreen.main.bounds.height - 20)
         }
-        .padding(.horizontal, 28)
-        .padding(.vertical, 24)
-        .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color(.secondarySystemGroupedBackground))
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .stroke(Color(.separator).opacity(0.5), lineWidth: 1)
-        )
-        .shadow(color: .black.opacity(0.06), radius: 16, x: 0, y: 8)
+        .background(Color(.systemBackground))
     }
+
+    // MARK: - Components
 
     private func authTextField(_ placeholder: String, text: Binding<String>, secure: Bool = false) -> some View {
         Group {
@@ -161,94 +176,139 @@ struct OnboardingView: View {
                 TextField(placeholder, text: text)
             }
         }
-        .padding(.horizontal, 14)
-        .padding(.vertical, 14)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 16)
         .background(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .fill(Color(.systemBackground))
         )
         .overlay(
-            RoundedRectangle(cornerRadius: 10, style: .continuous)
+            RoundedRectangle(cornerRadius: 12, style: .continuous)
                 .stroke(Color(.systemGray4), lineWidth: 1)
         )
     }
 
-    private var canSubmitEmail: Bool {
-        let trimmed = email.trimmingCharacters(in: .whitespaces)
-        return trimmed.contains("@") && trimmed.contains(".") && password.count >= 6
+    private func primaryButton(_ title: String, enabled: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Group {
+                if isSubmittingEmail {
+                    ProgressView().tint(.white)
+                } else {
+                    Text(title)
+                        .font(.headline)
+                }
+            }
+            .foregroundStyle(.white)
+            .frame(maxWidth: .infinity)
+            .frame(height: 54)
+            .background(
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(AuthTheme.brandBlue)
+            )
+        }
+        .disabled(!enabled || isBusy)
+        .opacity(enabled && !isBusy ? 1 : 0.55)
     }
 
-    private var orDivider: some View {
+    private func socialDivider(_ label: String) -> some View {
         HStack(spacing: 12) {
-            Rectangle()
-                .fill(Color(.separator))
-                .frame(height: 1)
-            Text("OR")
-                .font(.caption.weight(.semibold))
+            line
+            Text("- \(label) -")
+                .font(.caption)
                 .foregroundStyle(.secondary)
-            Rectangle()
-                .fill(Color(.separator))
-                .frame(height: 1)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
+            line
         }
     }
 
-    private var permissionNote: some View {
-        Text("Screen Time permission will be requested when you block your first app.")
-            .font(.caption)
-            .foregroundStyle(.tertiary)
-            .multilineTextAlignment(.center)
-            .padding(.horizontal, 12)
+    private var line: some View {
+        Rectangle()
+            .fill(Color(.systemGray4))
+            .frame(height: 1)
     }
 
-    // MARK: - Google button
+    private var socialButtonsRow: some View {
+        HStack(spacing: 20) {
+            googleIconButton
+            appleIconButton
+        }
+        .frame(maxWidth: .infinity)
+    }
 
-    private var googleSignInButton: some View {
+    private var googleIconButton: some View {
         Button {
             Task { await signInWithGoogle() }
         } label: {
-            HStack(spacing: 12) {
+            ZStack {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .stroke(Color(.systemGray4), lineWidth: 1)
+                    .frame(width: 56, height: 56)
                 if isSigningInGoogle {
                     ProgressView()
-                        .tint(.secondary)
-                        .frame(width: 20, height: 20)
                 } else {
                     googleLogo
                 }
-                Text(isSigningInGoogle ? "Signing in…" : "Sign in with Google")
-                    .font(.headline)
-                    .foregroundStyle(.primary)
             }
-            .frame(maxWidth: .infinity)
-            .frame(height: 52)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.systemBackground))
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 12)
-                    .stroke(Color(.systemGray4), lineWidth: 1)
-            )
         }
         .disabled(isBusy)
         .opacity(isBusy ? 0.6 : 1)
     }
 
-    private var googleLogo: some View {
-        ZStack {
-            Circle()
-                .fill(.white)
-                .frame(width: 24, height: 24)
-            Text("G")
-                .font(.system(size: 14, weight: .bold))
-                .foregroundStyle(
-                    LinearGradient(
-                        colors: [Color(red: 0.26, green: 0.52, blue: 0.96),
-                                 Color(red: 0.92, green: 0.26, blue: 0.21)],
-                        startPoint: .topLeading,
-                        endPoint: .bottomTrailing
-                    )
-                )
+    private var appleIconButton: some View {
+        SignInWithAppleButton(.signIn) { request in
+            let nonce = randomNonceString()
+            currentNonce = nonce
+            request.requestedScopes = [.fullName, .email]
+            request.nonce = sha256(nonce)
+        } onCompletion: { result in
+            Task { await handleAppleResult(result) }
         }
+        .signInWithAppleButtonStyle(.black)
+        .frame(width: 56, height: 56)
+        .clipShape(RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .disabled(isBusy)
+        .opacity(isBusy ? 0.6 : 1)
+    }
+
+    private var googleLogo: some View {
+        Text("G")
+            .font(.system(size: 22, weight: .bold))
+            .foregroundStyle(
+                LinearGradient(
+                    colors: [
+                        Color(red: 0.26, green: 0.52, blue: 0.96),
+                        Color(red: 0.92, green: 0.26, blue: 0.21)
+                    ],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
+    }
+
+    // MARK: - Validation
+
+    private var canSubmitLogin: Bool {
+        let trimmed = email.trimmingCharacters(in: .whitespaces)
+        return trimmed.contains("@") && trimmed.contains(".") && password.count >= 6
+    }
+
+    private var canSubmitSignUp: Bool {
+        canSubmitLogin && password == confirmPassword
+    }
+
+    // MARK: - Navigation
+
+    private func goToLogin() {
+        errorMessage = nil
+        confirmPassword = ""
+        screen = .login
+    }
+
+    private func goToSignUp() {
+        errorMessage = nil
+        confirmPassword = ""
+        screen = .signUp
     }
 
     // MARK: - Actions
@@ -271,7 +331,12 @@ struct OnboardingView: View {
         errorMessage = nil
         let trimmedEmail = email.trimmingCharacters(in: .whitespaces)
         do {
-            if isEmailSignUp {
+            if screen == .signUp {
+                guard password == confirmPassword else {
+                    errorMessage = "Passwords don't match."
+                    isSubmittingEmail = false
+                    return
+                }
                 try await SupabaseService.shared.signUpWithEmail(email: trimmedEmail, password: password)
             } else {
                 try await SupabaseService.shared.signInWithEmail(email: trimmedEmail, password: password)
@@ -304,7 +369,6 @@ struct OnboardingView: View {
             isSigningInApple = false
 
         case .failure(let error):
-            // ASAuthorizationError.canceled means the user dismissed the sheet — not an error.
             let code = (error as? ASAuthorizationError)?.code
             if code != .canceled {
                 errorMessage = friendlyError(error)
@@ -312,7 +376,6 @@ struct OnboardingView: View {
         }
     }
 
-    /// Surfaces the underlying reason so dashboard/config problems are visible during testing.
     private func friendlyError(_ error: Error) -> String {
         "Sign in failed: \(error.localizedDescription)"
     }
