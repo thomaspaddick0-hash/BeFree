@@ -96,6 +96,14 @@ final class SupabaseService: ObservableObject {
         )
     }
 
+    func signInWithEmail(email: String, password: String) async throws {
+        try await client.auth.signIn(email: email, password: password)
+    }
+
+    func signUpWithEmail(email: String, password: String) async throws {
+        try await client.auth.signUp(email: email, password: password)
+    }
+
     func signOut() async throws {
         try await client.auth.signOut()
     }
