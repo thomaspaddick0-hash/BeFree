@@ -5,9 +5,11 @@ import ManagedSettings
 struct HomeView: View {
     @EnvironmentObject var blockManager: BlockManager
     @State private var showingBlockCreation = false
+    @State private var showingHeldCodes = false
     @State private var deepLinkUnlockBlock: Block?
 
     var body: some View {
+        ZStack {
         VStack(spacing: 0) {
             if blockManager.activeBlocks.isEmpty {
                 Spacer()
@@ -32,6 +34,26 @@ struct HomeView: View {
         }
         .navigationTitle("BeFree")
         .navigationBarTitleDisplayMode(.large)
+        .toolbar {
+            ToolbarItem(placement: .navigationBarTrailing) {
+                Button {
+                    withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
+                        showingHeldCodes.toggle()
+                    }
+                } label: {
+                    Image(systemName: "person.2.fill")
+                        .foregroundStyle(blockManager.heldBlocks.isEmpty ? Color.secondary : Color.green)
+                        .overlay(alignment: .topTrailing) {
+                            if !blockManager.heldBlocks.isEmpty {
+                                Circle()
+                                    .fill(.green)
+                                    .frame(width: 8, height: 8)
+                                    .offset(x: 3, y: -3)
+                            }
+                        }
+                }
+            }
+        }
         .sheet(isPresented: $showingBlockCreation) {
             BlockCreationView()
         }
@@ -43,6 +65,14 @@ struct HomeView: View {
             deepLinkUnlockBlock = block
             blockManager.pendingUnlockDeepLink = false
         }
+
+        // Sliding held-codes drawer — layered over everything
+        if showingHeldCodes {
+            HeldCodesDrawer(isShowing: $showingHeldCodes)
+                .transition(.move(edge: .trailing))
+                .zIndex(1)
+        }
+        } // ZStack
     }
 
     private var addButton: some View {
@@ -140,6 +170,8 @@ struct FreeFromCard: View {
                 Text(Block.elapsedString(from: elapsed))
                     .font(.system(size: 36, weight: .bold, design: .monospaced))
                     .foregroundStyle(.green)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.4)
             }
         }
         .padding(20)

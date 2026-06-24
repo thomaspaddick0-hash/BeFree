@@ -1,31 +1,25 @@
 import SwiftUI
 import FamilyControls
 
-/// One of the most common apps people block, shown as a big button on the
-/// "Block the Website" screen. Domains come from `AppDomainMap` so the web
-/// filter stays in sync with the rest of the app.
-private struct CommonApp: Identifiable {
+/// A one-tap suggestion chip for the most common offenders on the
+/// "Also block the URL" screen. Tapping toggles its domain into the block list.
+private struct URLChip: Identifiable {
     let id = UUID()
     let name: String
-    let monogram: String
-    let tint: Color
-    var domains: [String] { AppDomainMap.domains(for: name) }
+    let domain: String
 }
 
-private let commonApps: [CommonApp] = [
-    CommonApp(name: "Instagram", monogram: "Ig", tint: Color(red: 0.83, green: 0.18, blue: 0.51)),
-    CommonApp(name: "TikTok",    monogram: "Tt", tint: .black),
-    CommonApp(name: "Snapchat",  monogram: "Sc", tint: Color(red: 0.98, green: 0.78, blue: 0.10)),
-    CommonApp(name: "YouTube",   monogram: "Yt", tint: Color(red: 0.90, green: 0.13, blue: 0.13)),
-    CommonApp(name: "X",         monogram: "X",  tint: .black),
-    CommonApp(name: "Facebook",  monogram: "Fb", tint: Color(red: 0.10, green: 0.40, blue: 0.92)),
+private let suggestedChips: [URLChip] = [
+    URLChip(name: "Instagram", domain: "instagram.com"),
+    URLChip(name: "TikTok",    domain: "tiktok.com"),
+    URLChip(name: "Facebook",  domain: "facebook.com"),
 ]
 
 struct BlockCreationView: View {
     @EnvironmentObject var blockManager: BlockManager
     @Environment(\.dismiss) private var dismiss
 
-    private enum Step: Hashable { case website, customURL, email }
+    private enum Step: Hashable { case website, email }
 
     @State private var path: [Step] = []
 
@@ -35,7 +29,7 @@ struct BlockCreationView: View {
 
     // What we'll record + email. Filled in on the website screen.
     @State private var blockAppName = "your app"
-    @State private var blockDomains: [String] = []
+    @State private var selectedDomains: Set<String> = []
     @State private var customURL = ""
 
     @State private var friendEmail = ""
@@ -49,9 +43,8 @@ struct BlockCreationView: View {
             pickAppScreen
                 .navigationDestination(for: Step.self) { step in
                     switch step {
-                    case .website:   websiteScreen
-                    case .customURL: customURLScreen
-                    case .email:     emailScreen
+                    case .website: websiteScreen
+                    case .email:   emailScreen
                     }
                 }
         }
@@ -69,6 +62,17 @@ struct BlockCreationView: View {
         VStack(spacing: 0) {
             screenHeader("Choose an app", accent: "to block")
 
+            // TODO: App Store lookup (iTunes Search API) for not-installed apps.
+            // Intended behavior: let users search
+            // https://itunes.apple.com/search?term=QUERY&entity=software&country=us
+            // and pick an app by name/icon even if it isn't on this device, then add
+            // it to the block list. NOT IMPLEMENTED because it can't actually block:
+            // ManagedSettings shields only accept opaque ApplicationTokens produced by
+            // FamilyActivityPicker (installed apps only). There is no public API to turn
+            // an App Store bundle ID into an ApplicationToken, so a non-installed app
+            // cannot be shielded natively — only its website can be blocked, which the
+            // "Also block the URL" screen already handles. Revisit if Apple exposes a
+            // token-from-bundle-ID API.
             picker
 
             primaryButton("Continue", enabled: hasSelection) {
@@ -130,116 +134,148 @@ struct BlockCreationView: View {
         #endif
     }
 
-    // MARK: - Screen 3: Block the Website
+    // MARK: - Screen 3: Also block the URL
 
     private var websiteScreen: some View {
         VStack(spacing: 0) {
-            screenHeader("Which app", accent: "did you pick?")
-
-            Text("Tap it so we can block its website too.")
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 24)
-                .padding(.bottom, 12)
+            screenHeader("Also block", accent: "the URL")
 
             ScrollView {
-                VStack(spacing: 12) {
-                    ForEach(commonApps) { app in
-                        Button {
-                            select(name: app.name, domains: app.domains)
-                        } label: {
-                            appButtonLabel(monogram: app.monogram, tint: app.tint, title: app.name)
-                        }
-                        .buttonStyle(.plain)
+                VStack(alignment: .leading, spacing: 20) {
+                    Text("Block it on the web too, so it isn't just a tap away in Safari. This step is optional.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+
+                    customURLField
+
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Common ones")
+                            .font(.footnote.weight(.semibold))
+                            .foregroundStyle(.secondary)
+                        chipsRow
                     }
 
-                    Button {
-                        path.append(.customURL)
-                    } label: {
-                        appButtonLabel(monogram: "?", tint: Color(.systemGray), title: "My app isn't listed")
+                    if !selectedDomains.isEmpty {
+                        VStack(alignment: .leading, spacing: 10) {
+                            Text("Blocking on the web")
+                                .font(.footnote.weight(.semibold))
+                                .foregroundStyle(.secondary)
+                            ForEach(selectedDomains.sorted(), id: \.self) { domain in
+                                selectedDomainRow(domain)
+                            }
+                        }
                     }
-                    .buttonStyle(.plain)
                 }
                 .padding(.horizontal, 24)
+                .padding(.top, 4)
                 .padding(.bottom, 24)
             }
+
+            primaryButton("Continue", enabled: true) { continueFromWebsite() }
         }
         .background(Color(.systemGroupedBackground))
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func appButtonLabel(monogram: String, tint: Color, title: String) -> some View {
-        HStack(spacing: 16) {
-            Text(monogram)
-                .font(.headline.bold())
-                .foregroundStyle(.white)
-                .frame(width: 48, height: 48)
-                .background(RoundedRectangle(cornerRadius: 12).fill(tint.gradient))
-            Text(title)
-                .font(.title3.weight(.semibold))
-                .foregroundStyle(.primary)
-            Spacer()
-            Image(systemName: "chevron.right")
-                .font(.headline.weight(.semibold))
-                .foregroundStyle(Color(.systemGray3))
+    private var customURLField: some View {
+        HStack(spacing: 10) {
+            Image(systemName: "magnifyingglass")
+                .foregroundStyle(.green)
+            TextField("Add a website (e.g. reddit.com)", text: $customURL)
+                .textInputAutocapitalization(.never)
+                .keyboardType(.URL)
+                .autocorrectionDisabled()
+                .onSubmit { addCustomURL() }
+            if !cleanHost(customURL).isEmpty {
+                Button { addCustomURL() } label: {
+                    Image(systemName: "plus.circle.fill")
+                        .font(.title3)
+                        .foregroundStyle(.green)
+                }
+            }
         }
         .padding(16)
-        .frame(maxWidth: .infinity)
-        .background(RoundedRectangle(cornerRadius: 18).fill(Color(.systemBackground)))
-        .overlay(RoundedRectangle(cornerRadius: 18).stroke(Color(.systemGray5), lineWidth: 1))
-        .contentShape(Rectangle())
+        .background(Color(.systemBackground))
+        .clipShape(RoundedRectangle(cornerRadius: 14))
+        .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.green, lineWidth: 1.5))
     }
 
-    private func select(name: String, domains: [String]) {
-        blockAppName = name
-        blockDomains = domains
+    private var chipsRow: some View {
+        HStack(spacing: 10) {
+            ForEach(suggestedChips) { chip in
+                chipView(chip)
+            }
+            Spacer(minLength: 0)
+        }
+    }
+
+    private func chipView(_ chip: URLChip) -> some View {
+        let isOn = selectedDomains.contains(chip.domain)
+        return Button {
+            if isOn { selectedDomains.remove(chip.domain) }
+            else { selectedDomains.insert(chip.domain) }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: isOn ? "checkmark.circle.fill" : "plus.circle")
+                    .font(.subheadline)
+                Text(chip.name)
+                    .font(.subheadline.weight(.medium))
+            }
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(Capsule().fill(isOn ? Color.green.opacity(0.15) : Color(.systemBackground)))
+            .overlay(Capsule().stroke(isOn ? Color.green : Color(.systemGray4), lineWidth: 1))
+            .foregroundStyle(isOn ? Color.green : Color.primary)
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func selectedDomainRow(_ domain: String) -> some View {
+        HStack(spacing: 12) {
+            Image(systemName: "globe")
+                .foregroundStyle(.green)
+            Text(domain)
+                .font(.body)
+                .foregroundStyle(.primary)
+            Spacer()
+            Button { selectedDomains.remove(domain) } label: {
+                Image(systemName: "xmark.circle.fill")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 12)
+        .background(RoundedRectangle(cornerRadius: 12).fill(Color(.systemBackground)))
+        .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.systemGray5), lineWidth: 1))
+    }
+
+    private func addCustomURL() {
+        let host = cleanHost(customURL)
+        guard !host.isEmpty else { return }
+        selectedDomains.insert(host)
+        customURL = ""
+    }
+
+    private func continueFromWebsite() {
+        addCustomURL()   // fold in anything left typed but not yet added
+        let domains = Array(selectedDomains)
+        blockAppName = deriveAppName(from: domains)
         blockManager.applyPendingWebDomains(domains)
         path.append(.email)
     }
 
-    // MARK: - Screen 3b: Custom URL / Skip
-
-    private var customURLScreen: some View {
-        VStack(spacing: 0) {
-            screenHeader("Block a", accent: "website")
-
-            VStack(alignment: .leading, spacing: 12) {
-                Text("Enter the website you want to block, or skip and just block the app.")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-
-                TextField("example.com", text: $customURL)
-                    .textInputAutocapitalization(.never)
-                    .keyboardType(.URL)
-                    .autocorrectionDisabled()
-                    .padding(16)
-                    .background(Color(.systemBackground))
-                    .clipShape(RoundedRectangle(cornerRadius: 14))
-                    .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color(.systemGray5), lineWidth: 1))
-            }
-            .padding(.horizontal, 24)
-
-            Spacer()
-
-            VStack(spacing: 12) {
-                primaryButton("Block this website", enabled: !cleanedHost.isEmpty) {
-                    select(name: cleanedHost, domains: [cleanedHost])
-                }
-                Button("Skip — just block the app") {
-                    select(name: blockAppName == "your app" ? "your app" : blockAppName, domains: [])
-                }
-                .foregroundStyle(.secondary)
-                .padding(.bottom, 24)
-            }
+    /// Pick a human-readable name for the record/email: a known chip name if one
+    /// is selected, otherwise the first domain, otherwise a generic fallback.
+    private func deriveAppName(from domains: [String]) -> String {
+        if let chip = suggestedChips.first(where: { selectedDomains.contains($0.domain) }) {
+            return chip.name
         }
-        .background(Color(.systemGroupedBackground))
-        .navigationBarTitleDisplayMode(.inline)
+        return domains.first ?? "your app"
     }
 
     /// Strip scheme / www / path so we store a bare host like "example.com".
-    private var cleanedHost: String {
-        var s = customURL.trimmingCharacters(in: .whitespaces).lowercased()
+    private func cleanHost(_ raw: String) -> String {
+        var s = raw.trimmingCharacters(in: .whitespaces).lowercased()
         for prefix in ["https://", "http://", "www."] where s.hasPrefix(prefix) {
             s = String(s.dropFirst(prefix.count))
         }
