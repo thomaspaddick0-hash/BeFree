@@ -6,7 +6,7 @@ import UIKit
 // the user tries to open a blocked app.
 class ShieldConfigurationExtension: ShieldConfigurationDataSource {
 
-    private let sharedDefaults = UserDefaults(suiteName: "group.com.befree.app")!
+    private let sharedDefaults = UserDefaults(suiteName: "group.com.timetobefree.app")!
 
     override func configuration(shielding application: Application) -> ShieldConfiguration {
         let appName = application.localizedDisplayName ?? "this app"

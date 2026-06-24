@@ -42,10 +42,10 @@ File → New → Target → App Extension → **Device Activity Monitor Extensio
 
 For the **main BeFree target**:
 - Signing & Capabilities → + → **Family Controls**
-- Signing & Capabilities → + → **App Groups** → add `group.com.befree.app`
+- Signing & Capabilities → + → **App Groups** → add `group.com.timetobefree.app`
 
 For **BeFreeShield** and **BeFreeMonitor** targets:
-- Signing & Capabilities → + → **App Groups** → add `group.com.befree.app`
+- Signing & Capabilities → + → **App Groups** → add `group.com.timetobefree.app`
 
 ## Step 5 — Add Swift Packages
 

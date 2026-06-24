@@ -7,7 +7,7 @@ import Foundation
 // buttons do nothing.
 class ShieldActionExtension: ShieldActionDelegate {
 
-    private let sharedDefaults = UserDefaults(suiteName: "group.com.befree.app")
+    private let sharedDefaults = UserDefaults(suiteName: "group.com.timetobefree.app")
 
     override func handle(
         action: ShieldAction,

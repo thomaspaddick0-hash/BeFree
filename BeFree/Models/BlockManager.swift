@@ -20,7 +20,7 @@ final class BlockManager: ObservableObject {
 
     private let supabase = SupabaseService.shared
     private let resend = ResendService.shared
-    private let sharedDefaults = UserDefaults(suiteName: "group.com.befree.app")!
+    private let sharedDefaults = UserDefaults(suiteName: "group.com.timetobefree.app")!
 
     // A block being assembled across the creation flow. Restrictions are applied
     // to ManagedSettingsStore immediately (for instant effect) but the durable

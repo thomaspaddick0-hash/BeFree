@@ -13,7 +13,7 @@ import Foundation
 class DeviceActivityMonitorExtension: DeviceActivityMonitor {
 
     private let store = ManagedSettingsStore()
-    private let sharedDefaults = UserDefaults(suiteName: "group.com.befree.app")!
+    private let sharedDefaults = UserDefaults(suiteName: "group.com.timetobefree.app")!
 
     override func intervalDidStart(for activity: DeviceActivityName) {
         // Called when the daily monitoring schedule starts.
