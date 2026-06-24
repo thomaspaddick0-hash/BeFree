@@ -37,6 +37,27 @@ final class SupabaseService: ObservableObject {
         return user.email?.components(separatedBy: "@").first ?? "Someone"
     }
 
+    var currentUserEmail: String? { client.auth.currentUser?.email }
+
+    /// Up to two uppercase initials from the display name (falls back to email).
+    var currentUserInitials: String {
+        let parts = currentUserDisplayName.split(separator: " ").prefix(2)
+        let initials = parts.compactMap(\.first).map(String.init).joined()
+        if !initials.isEmpty { return initials.uppercased() }
+        return currentUserEmail?.first.map { String($0).uppercased() } ?? "?"
+    }
+
+    /// Friendly name of the auth provider used (e.g. "Google", "Apple").
+    var currentUserProvider: String {
+        switch client.auth.currentUser?.identities?.first?.provider {
+        case "google": return "Google"
+        case "apple":  return "Apple"
+        case "email":  return "Email"
+        case .some(let other) where !other.isEmpty: return other.capitalized
+        default: return ""
+        }
+    }
+
     // MARK: - Auth
 
     private func observeAuthState() async {

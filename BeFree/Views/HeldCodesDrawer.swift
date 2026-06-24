@@ -1,54 +1,11 @@
 import SwiftUI
 
-struct HeldCodesDrawer: View {
+/// The list of codes the current user is holding for friends. Rendered as a
+/// section inside the account/menu drawer.
+struct HeldCodesList: View {
     @EnvironmentObject var blockManager: BlockManager
-    @Binding var isShowing: Bool
 
     var body: some View {
-        ZStack(alignment: .trailing) {
-            // Dimming backdrop
-            Color.black.opacity(0.3)
-                .ignoresSafeArea()
-                .onTapGesture { close() }
-
-            // Drawer panel
-            VStack(spacing: 0) {
-                drawerHeader
-                Divider()
-                drawerContent
-            }
-            .frame(width: min(UIScreen.main.bounds.width * 0.82, 340))
-            .background(Color(.systemGroupedBackground))
-            .clipShape(RoundedRectangle(cornerRadius: 20))
-            .shadow(color: .black.opacity(0.18), radius: 24, x: -4, y: 0)
-            .padding(.vertical, 20)
-            .padding(.trailing, 12)
-        }
-    }
-
-    private var drawerHeader: some View {
-        HStack {
-            VStack(alignment: .leading, spacing: 2) {
-                Text("Codes I'm Holding")
-                    .font(.title3.bold())
-                Text("\(blockManager.heldBlocks.count) active")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
-            }
-            Spacer()
-            Button { close() } label: {
-                Image(systemName: "xmark.circle.fill")
-                    .font(.title2)
-                    .foregroundStyle(.secondary)
-            }
-        }
-        .padding(.horizontal, 20)
-        .padding(.top, 20)
-        .padding(.bottom, 14)
-    }
-
-    @ViewBuilder
-    private var drawerContent: some View {
         if blockManager.heldBlocks.isEmpty {
             emptyState
         } else {
@@ -77,12 +34,6 @@ struct HeldCodesDrawer: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(24)
-    }
-
-    private func close() {
-        withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-            isShowing = false
-        }
     }
 }
 
@@ -161,9 +112,6 @@ private struct HeldBlockCard: View {
         HeldBlock(id: UUID(), blockerName: "Emma", appName: "TikTok",
                   code: "1083", blockedAt: Date().addingTimeInterval(-172800)),
     ]
-    return ZStack {
-        Color(.systemGroupedBackground).ignoresSafeArea()
-        HeldCodesDrawer(isShowing: .constant(true))
-            .environmentObject(manager)
-    }
+    return HeldCodesList()
+        .environmentObject(manager)
 }

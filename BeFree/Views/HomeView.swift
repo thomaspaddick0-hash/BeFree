@@ -4,8 +4,9 @@ import ManagedSettings
 
 struct HomeView: View {
     @EnvironmentObject var blockManager: BlockManager
+    @ObservedObject private var auth = SupabaseService.shared
     @State private var showingBlockCreation = false
-    @State private var showingHeldCodes = false
+    @State private var showingMenu = false
     @State private var deepLinkUnlockBlock: Block?
 
     var body: some View {
@@ -38,17 +39,17 @@ struct HomeView: View {
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     withAnimation(.spring(response: 0.35, dampingFraction: 0.85)) {
-                        showingHeldCodes.toggle()
+                        showingMenu.toggle()
                     }
                 } label: {
-                    Image(systemName: "person.2.fill")
-                        .foregroundStyle(blockManager.heldBlocks.isEmpty ? Color.secondary : Color.green)
+                    InitialsCircle(initials: auth.currentUserInitials, size: 30)
                         .overlay(alignment: .topTrailing) {
                             if !blockManager.heldBlocks.isEmpty {
                                 Circle()
                                     .fill(.green)
-                                    .frame(width: 8, height: 8)
-                                    .offset(x: 3, y: -3)
+                                    .frame(width: 9, height: 9)
+                                    .overlay(Circle().stroke(Color(.systemBackground), lineWidth: 1.5))
+                                    .offset(x: 2, y: -2)
                             }
                         }
                 }
@@ -66,9 +67,9 @@ struct HomeView: View {
             blockManager.pendingUnlockDeepLink = false
         }
 
-        // Sliding held-codes drawer — layered over everything
-        if showingHeldCodes {
-            HeldCodesDrawer(isShowing: $showingHeldCodes)
+        // Sliding account / menu sidebar — layered over everything
+        if showingMenu {
+            MenuDrawer(isShowing: $showingMenu)
                 .transition(.move(edge: .trailing))
                 .zIndex(1)
         }

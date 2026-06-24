@@ -11,11 +11,12 @@
 		220C13A62685F20B3613694A /* OnboardingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = EE14812653A74796340A561B /* OnboardingView.swift */; };
 		268EDB141000AEA4F1194353 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = C679C40147510A4AEC75F009 /* Supabase */; };
 		2A0F805CEAE1AB67A114D9D6 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8FCEFAA98137AA9B6F8AD1B2 /* HomeView.swift */; };
-		94C74CF85EBB42B2A17074DC /* HeldCodesDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00E5C17A7FB346C5B1EBF2C1 /* HeldCodesDrawer.swift */; };
 		2A4C18A18AE2457557FCD98A /* BlockManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3F9E5BAFCB7C529F667941B1 /* BlockManager.swift */; };
 		423D9A9310C8F0B575C83566 /* Block.swift in Sources */ = {isa = PBXBuildFile; fileRef = 968206643C4A9592AC9CED44 /* Block.swift */; };
+		454600D8DB2335DC85A94959 /* MenuDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0DABEA9D24980241BC871A39 /* MenuDrawer.swift */; };
 		4B31805780564D80317CB3D2 /* DeviceActivityMonitorExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4716221901B0E1FE88B68069 /* DeviceActivityMonitorExtension.swift */; };
 		537E50327C80CFA24806AFE9 /* BlockRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A8D7F5119967DB1805290710 /* BlockRowView.swift */; };
+		57EEEE54436F81F52A5E7DA8 /* HeldCodesDrawer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5F58BAFC52316D83ECBF63D0 /* HeldCodesDrawer.swift */; };
 		58DE191905E32A77E58174FD /* ShieldActionExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 532F602C7F61A893660D9286 /* ShieldActionExtension.swift */; };
 		7F99735C5196E0850C7388E9 /* BeFreeApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A7E980152227A523FCF1DFCC /* BeFreeApp.swift */; };
 		90B14F8031AADD626271D74B /* AppDomainMap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7478341859E657553E784F3E /* AppDomainMap.swift */; };
@@ -72,27 +73,28 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		0DABEA9D24980241BC871A39 /* MenuDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuDrawer.swift; sourceTree = "<group>"; };
 		1E4548E28B693FA3D655D0B3 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		1F7F0C08175A8A43AF25CD98 /* BeFree.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = BeFree.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		1F7F0C08175A8A43AF25CD98 /* BeFree.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = BeFree.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		299D7B50D986650A9A850AF3 /* Secrets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Secrets.swift; sourceTree = "<group>"; };
 		3F9E5BAFCB7C529F667941B1 /* BlockManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockManager.swift; sourceTree = "<group>"; };
 		4716221901B0E1FE88B68069 /* DeviceActivityMonitorExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeviceActivityMonitorExtension.swift; sourceTree = "<group>"; };
 		4C29E5B04013A278BC940BE7 /* ShieldConfigurationExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldConfigurationExtension.swift; sourceTree = "<group>"; };
 		52EE7061F893CF0A4E39A99D /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		532F602C7F61A893660D9286 /* ShieldActionExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShieldActionExtension.swift; sourceTree = "<group>"; };
+		5F58BAFC52316D83ECBF63D0 /* HeldCodesDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeldCodesDrawer.swift; sourceTree = "<group>"; };
 		6554FECB9EAC14FB4ADC9BFC /* ResendService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ResendService.swift; sourceTree = "<group>"; };
 		7478341859E657553E784F3E /* AppDomainMap.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDomainMap.swift; sourceTree = "<group>"; };
 		80DCBD53E2D337BF8B811636 /* BlockCreationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockCreationView.swift; sourceTree = "<group>"; };
 		8FCEFAA98137AA9B6F8AD1B2 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
-		00E5C17A7FB346C5B1EBF2C1 /* HeldCodesDrawer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HeldCodesDrawer.swift; sourceTree = "<group>"; };
 		968206643C4A9592AC9CED44 /* Block.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Block.swift; sourceTree = "<group>"; };
-		A65628CC586F0790851CE2F3 /* BeFreeShieldAction.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BeFreeShieldAction.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		A65628CC586F0790851CE2F3 /* BeFreeShieldAction.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = BeFreeShieldAction.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		A7E980152227A523FCF1DFCC /* BeFreeApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BeFreeApp.swift; sourceTree = "<group>"; };
 		A8D7F5119967DB1805290710 /* BlockRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlockRowView.swift; sourceTree = "<group>"; };
-		C63E39A6AA25147D970D44D4 /* BeFreeMonitor.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BeFreeMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C63E39A6AA25147D970D44D4 /* BeFreeMonitor.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = BeFreeMonitor.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		D2F073DFD953DD7639071EEE /* UnlockView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnlockView.swift; sourceTree = "<group>"; };
 		D346BAC44B6597BC19C253AB /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
-		E70B5806AB1D33131D9D216A /* BeFreeShield.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = BeFreeShield.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E70B5806AB1D33131D9D216A /* BeFreeShield.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = BeFreeShield.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		EE14812653A74796340A561B /* OnboardingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OnboardingView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -163,8 +165,9 @@
 			children = (
 				80DCBD53E2D337BF8B811636 /* BlockCreationView.swift */,
 				A8D7F5119967DB1805290710 /* BlockRowView.swift */,
+				5F58BAFC52316D83ECBF63D0 /* HeldCodesDrawer.swift */,
 				8FCEFAA98137AA9B6F8AD1B2 /* HomeView.swift */,
-				00E5C17A7FB346C5B1EBF2C1 /* HeldCodesDrawer.swift */,
+				0DABEA9D24980241BC871A39 /* MenuDrawer.swift */,
 				EE14812653A74796340A561B /* OnboardingView.swift */,
 				D2F073DFD953DD7639071EEE /* UnlockView.swift */,
 			);
@@ -285,7 +288,7 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = YES;
-				LastUpgradeCheck = 2650;
+				LastUpgradeCheck = 1430;
 				TargetAttributes = {
 					2AE37B61FC57CDF4052C91A9 = {
 						DevelopmentTeam = HYKMNRWXBK;
@@ -353,8 +356,9 @@
 				2A4C18A18AE2457557FCD98A /* BlockManager.swift in Sources */,
 				537E50327C80CFA24806AFE9 /* BlockRowView.swift in Sources */,
 				BD7D172B03D5C15E05738205 /* ContentView.swift in Sources */,
+				57EEEE54436F81F52A5E7DA8 /* HeldCodesDrawer.swift in Sources */,
 				2A0F805CEAE1AB67A114D9D6 /* HomeView.swift in Sources */,
-				94C74CF85EBB42B2A17074DC /* HeldCodesDrawer.swift in Sources */,
+				454600D8DB2335DC85A94959 /* MenuDrawer.swift in Sources */,
 				220C13A62685F20B3613694A /* OnboardingView.swift in Sources */,
 				F127531F86C213F207EBA442 /* ResendService.swift in Sources */,
 				DD0AD3262928024CAA5FF34C /* Secrets.swift in Sources */,
@@ -448,7 +452,6 @@
 				DEVELOPMENT_TEAM = HYKMNRWXBK;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_NO_COMMON_BLOCKS = YES;
@@ -470,7 +473,6 @@
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
@@ -487,7 +489,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app.monitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app.monitor;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -503,7 +505,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app.shield;
+				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app.shield;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -519,7 +521,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app.shield;
+				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app.shield;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -535,7 +537,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app.monitor;
+				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app.monitor;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -555,7 +557,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -575,7 +577,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app;
+				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -591,7 +593,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app.shieldaction;
+				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app.shieldaction;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -637,7 +639,6 @@
 				DEVELOPMENT_TEAM = HYKMNRWXBK;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
-				ENABLE_USER_SCRIPT_SANDBOXING = YES;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_NO_COMMON_BLOCKS = YES;
 				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
@@ -652,7 +653,6 @@
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = iphoneos;
-				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
@@ -669,7 +669,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				PRODUCT_BUNDLE_IDENTIFIER = com.timetobefree.app.shieldaction;
+				PRODUCT_BUNDLE_IDENTIFIER = com.befree.app.shieldaction;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
