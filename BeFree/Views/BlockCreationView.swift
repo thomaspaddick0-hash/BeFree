@@ -30,7 +30,11 @@ struct BlockCreationView: View {
     // Human-readable name for Supabase + emails. Apple doesn't expose the picked app's name.
     @State private var blockAppName = ""
     @State private var selectedDomains: Set<String> = []
-    @State private var customURL = ""
+    @State private var unifiedSearch = ""
+
+    @AppStorage("hasSeenFirstBlockOnboarding") private var hasSeenFirstBlockOnboarding = false
+    @State private var showFirstBlockOnboarding = false
+    @State private var urlOnlyMode = false
 
     @State private var friendEmail = ""
     @State private var isSubmitting = false
@@ -49,11 +53,63 @@ struct BlockCreationView: View {
                 }
         }
         .tint(.green)
-        .onAppear { blockManager.beginPendingBlock() }
+        .onAppear {
+            blockManager.beginPendingBlock()
+            if !hasSeenFirstBlockOnboarding {
+                showFirstBlockOnboarding = true
+            }
+        }
         .onDisappear {
             // Swipe-to-dismiss or Cancel before finishing → undo what we applied.
             if !didFinalize { blockManager.cancelPendingBlock() }
         }
+        .sheet(isPresented: $showFirstBlockOnboarding) {
+            firstBlockOnboardingSheet
+        }
+    }
+
+    // MARK: - First-block onboarding (shown once)
+
+    private var firstBlockOnboardingSheet: some View {
+        VStack(spacing: 28) {
+            FeatherMark(size: 52, color: .green)
+
+            VStack(spacing: 10) {
+                Text("Block just a website?")
+                    .font(.title2.bold())
+                Text("You can block a URL in Safari without blocking the full app on your phone.")
+                    .font(.body)
+                    .foregroundStyle(.secondary)
+                    .multilineTextAlignment(.center)
+            }
+
+            VStack(spacing: 12) {
+                Button {
+                    hasSeenFirstBlockOnboarding = true
+                    showFirstBlockOnboarding = false
+                    urlOnlyMode = true
+                    path = [.website]
+                } label: {
+                    Text("Block this URL")
+                        .font(.headline)
+                        .frame(maxWidth: .infinity)
+                        .frame(height: 52)
+                }
+                .buttonStyle(.borderedProminent)
+                .tint(.green)
+
+                Button("Skip") {
+                    hasSeenFirstBlockOnboarding = true
+                    showFirstBlockOnboarding = false
+                    dismiss()
+                }
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            }
+        }
+        .padding(32)
+        .presentationDetents([.medium])
+        .interactiveDismissDisabled()
     }
 
     // MARK: - Screen 2: Pick an App
@@ -140,31 +196,19 @@ struct BlockCreationView: View {
         VStack(spacing: 0) {
             screenHeader("Also block", accent: "the URL")
 
+            if let message = blockManager.restrictionsStatusMessage {
+                restrictionsBanner(message)
+            }
+
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("Which app did you pick?")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.secondary)
-                        TextField("e.g. Letterboxd", text: $blockAppName)
-                            .textInputAutocapitalization(.words)
-                            .autocorrectionDisabled()
-                            .padding(16)
-                            .background(Color(.systemBackground))
-                            .clipShape(RoundedRectangle(cornerRadius: 14))
-                            .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.green.opacity(0.6), lineWidth: 1.5))
-                    }
-
-                    Text("Block it on the web too, so it isn't just a tap away in Safari. This step is optional.")
+                    Text("Search for an app name or website to block on the web. This step is optional.")
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
 
-                    customURLField
+                    unifiedSearchField
 
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Common ones")
-                            .font(.footnote.weight(.semibold))
-                            .foregroundStyle(.secondary)
+                    if !filteredChips.isEmpty {
                         chipsRow
                     }
 
@@ -178,6 +222,16 @@ struct BlockCreationView: View {
                             }
                         }
                     }
+
+                    if !blockAppName.isEmpty {
+                        HStack(spacing: 8) {
+                            Image(systemName: "app.fill")
+                                .foregroundStyle(.green)
+                            Text("Blocking as: \(blockAppName)")
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
                 .padding(.horizontal, 24)
                 .padding(.top, 4)
@@ -188,19 +242,56 @@ struct BlockCreationView: View {
         }
         .background(Color(.systemGroupedBackground))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .primaryAction) {
+                Button {
+                    flushUnifiedSearch()
+                    syncWebBlocks(notify: true)
+                    blockManager.reapplyRestrictions(notify: true)
+                } label: {
+                    Image(systemName: "arrow.clockwise")
+                }
+                .accessibilityLabel("Refresh blocks")
+            }
+        }
+        .onChange(of: selectedDomains) { _ in
+            syncWebBlocks(notify: true)
+        }
     }
 
-    private var customURLField: some View {
+    private func restrictionsBanner(_ message: String) -> some View {
+        HStack(spacing: 8) {
+            Image(systemName: "checkmark.circle.fill")
+                .foregroundStyle(.green)
+            Text(message)
+                .font(.subheadline.weight(.medium))
+            Spacer()
+        }
+        .padding(.horizontal, 16)
+        .padding(.vertical, 10)
+        .background(Color.green.opacity(0.12))
+        .clipShape(RoundedRectangle(cornerRadius: 10))
+        .padding(.horizontal, 24)
+        .padding(.bottom, 8)
+        .onAppear {
+            Task {
+                try? await Task.sleep(nanoseconds: 2_500_000_000)
+                blockManager.clearRestrictionsStatus()
+            }
+        }
+    }
+
+    private var unifiedSearchField: some View {
         HStack(spacing: 10) {
             Image(systemName: "magnifyingglass")
                 .foregroundStyle(.green)
-            TextField("Add a website (e.g. reddit.com)", text: $customURL)
+            TextField("App or website (e.g. Letterboxd, reddit.com)", text: $unifiedSearch)
                 .textInputAutocapitalization(.never)
-                .keyboardType(.URL)
+                .keyboardType(.webSearch)
                 .autocorrectionDisabled()
-                .onSubmit { addCustomURL() }
-            if !cleanHost(customURL).isEmpty {
-                Button { addCustomURL() } label: {
+                .onSubmit { flushUnifiedSearch() }
+            if !unifiedSearch.trimmingCharacters(in: .whitespaces).isEmpty {
+                Button { flushUnifiedSearch() } label: {
                     Image(systemName: "plus.circle.fill")
                         .font(.title3)
                         .foregroundStyle(.green)
@@ -213,9 +304,17 @@ struct BlockCreationView: View {
         .overlay(RoundedRectangle(cornerRadius: 14).stroke(Color.green, lineWidth: 1.5))
     }
 
+    private var filteredChips: [URLChip] {
+        let q = unifiedSearch.trimmingCharacters(in: .whitespaces).lowercased()
+        if q.isEmpty { return suggestedChips }
+        return suggestedChips.filter {
+            $0.name.lowercased().contains(q) || $0.domain.contains(q)
+        }
+    }
+
     private var chipsRow: some View {
         HStack(spacing: 10) {
-            ForEach(suggestedChips) { chip in
+            ForEach(filteredChips) { chip in
                 chipView(chip)
             }
             Spacer(minLength: 0)
@@ -225,8 +324,13 @@ struct BlockCreationView: View {
     private func chipView(_ chip: URLChip) -> some View {
         let isOn = selectedDomains.contains(chip.domain)
         return Button {
-            if isOn { selectedDomains.remove(chip.domain) }
-            else { selectedDomains.insert(chip.domain) }
+            if isOn {
+                selectedDomains.remove(chip.domain)
+            } else {
+                selectedDomains.insert(chip.domain)
+                if blockAppName.isEmpty { blockAppName = chip.name }
+            }
+            syncWebBlocks(notify: true)
         } label: {
             HStack(spacing: 6) {
                 Image(systemName: isOn ? "checkmark.circle.fill" : "plus.circle")
@@ -251,7 +355,10 @@ struct BlockCreationView: View {
                 .font(.body)
                 .foregroundStyle(.primary)
             Spacer()
-            Button { selectedDomains.remove(domain) } label: {
+            Button {
+                selectedDomains.remove(domain)
+                syncWebBlocks(notify: true)
+            } label: {
                 Image(systemName: "xmark.circle.fill")
                     .foregroundStyle(.secondary)
             }
@@ -262,11 +369,32 @@ struct BlockCreationView: View {
         .overlay(RoundedRectangle(cornerRadius: 12).stroke(Color(.systemGray5), lineWidth: 1))
     }
 
-    private func addCustomURL() {
-        let host = cleanHost(customURL)
-        guard !host.isEmpty else { return }
-        selectedDomains.insert(host)
-        customURL = ""
+    /// Parse the unified search box: URLs become blocked domains; plain text becomes the app name.
+    private func flushUnifiedSearch() {
+        let trimmed = unifiedSearch.trimmingCharacters(in: .whitespaces)
+        guard !trimmed.isEmpty else { return }
+
+        if let chip = suggestedChips.first(where: {
+            $0.name.lowercased() == trimmed.lowercased() || $0.domain == trimmed.lowercased()
+        }) {
+            selectedDomains.insert(chip.domain)
+            if blockAppName.isEmpty { blockAppName = chip.name }
+            unifiedSearch = ""
+            return
+        }
+
+        let host = cleanHost(trimmed)
+        if host.contains(".") {
+            selectedDomains.insert(host)
+            if blockAppName.isEmpty { blockAppName = titleCasedAppName(from: host) }
+        } else {
+            blockAppName = trimmed.prefix(1).uppercased() + trimmed.dropFirst()
+        }
+        unifiedSearch = ""
+    }
+
+    private func syncWebBlocks(notify: Bool) {
+        blockManager.applyPendingWebDomains(Array(selectedDomains), notify: notify)
     }
 
     private var canContinueFromWebsite: Bool {
@@ -276,14 +404,18 @@ struct BlockCreationView: View {
     private var resolvedAppName: String {
         let typed = blockAppName.trimmingCharacters(in: .whitespaces)
         if !typed.isEmpty { return typed }
+        let pending = unifiedSearch.trimmingCharacters(in: .whitespaces)
+        if !pending.isEmpty, !pending.contains(".") {
+            return pending.prefix(1).uppercased() + pending.dropFirst()
+        }
         return deriveAppName(from: Array(selectedDomains))
     }
 
     private func continueFromWebsite() {
-        addCustomURL()   // fold in anything left typed but not yet added
+        flushUnifiedSearch()
         let domains = Array(selectedDomains)
         blockAppName = resolvedAppName
-        blockManager.applyPendingWebDomains(domains)
+        syncWebBlocks(notify: true)
         path.append(.email)
     }
 

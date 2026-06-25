@@ -9,6 +9,7 @@ final class BlockManager: ObservableObject {
     @Published var heldBlocks: [HeldBlock] = []
     @Published private(set) var unseenHeldCodesCount = 0
     @Published var pendingUnlockDeepLink = false
+    @Published private(set) var restrictionsStatusMessage: String?
 
     private let viewedHeldCodesKey = "viewedHeldCodeIDs"
 
@@ -45,14 +46,19 @@ final class BlockManager: ObservableObject {
 
     /// Re-shield apps after relaunch or returning from background. Tokens live locally,
     /// not in Supabase — without this, force-quitting the app clears all blocks.
-    func reapplyRestrictions() {
+    func reapplyRestrictions(notify: Bool = false) {
         #if !targetEnvironment(simulator)
         rebuildShield()
         rebuildWebFilter()
-        if !activeBlocks.filter(\.isActive).isEmpty {
+        if !activeBlocks.filter(\.isActive).isEmpty || pendingSelection != nil || !pendingDomains.isEmpty {
             startMonitoringIfNeeded()
         }
         #endif
+        if notify { restrictionsStatusMessage = "Restrictions refreshed" }
+    }
+
+    func clearRestrictionsStatus() {
+        restrictionsStatusMessage = nil
     }
 
     /// Call when the user opens the held-codes screen so the avatar badge clears.
@@ -94,11 +100,16 @@ final class BlockManager: ObservableObject {
     }
 
     /// Screen 3: filter the picked app's website immediately.
-    func applyPendingWebDomains(_ domains: [String]) {
+    func applyPendingWebDomains(_ domains: [String], notify: Bool = true) {
         pendingDomains = domains
         #if !targetEnvironment(simulator)
         rebuildWebFilter()
         #endif
+        if notify {
+            restrictionsStatusMessage = domains.isEmpty
+                ? "Web blocks cleared"
+                : "Now blocking \(domains.count) URL\(domains.count == 1 ? "" : "s")"
+        }
     }
 
     /// User abandoned the flow before finishing — undo anything applied.
